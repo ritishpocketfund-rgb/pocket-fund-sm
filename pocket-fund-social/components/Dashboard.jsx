@@ -1,4 +1,10 @@
 import { useState, useEffect, useCallback, createContext, useContext, useRef, useMemo } from "react";
+import { createClient } from "@supabase/supabase-js";
+
+// ─── Supabase Client ────────────────────────────────────────────────────────
+const SB_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const SB_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+const sb = SB_URL && SB_KEY ? createClient(SB_URL, SB_KEY) : null;
 
 // ─── Contexts ────────────────────────────────────────────────────────────────
 const ThemeContext = createContext();
@@ -56,7 +62,7 @@ const PLATFORMS = {
 const STATUSES = { draft:{label:"Draft",color:"#94A3B8",bg:"#F1F5F9"}, in_review:{label:"In Review",color:"#F59E0B",bg:"#FFFBEB"}, approved:{label:"Approved",color:"#22C55E",bg:"#F0FDF4"}, scheduled:{label:"Scheduled",color:"#8B5CF6",bg:"#F5F3FF"}, published:{label:"Published",color:"#059669",bg:"#ECFDF5"} };
 const TASK_TYPES = ["Copy","Design","Review","Publish","Edit Video","Graphic Design"];
 const TASK_STATUSES = { todo:"To Do", in_progress:"In Progress", done:"Done", blocked:"Blocked" };
-const POST_TYPES = ["Reel","Carousel","Static","Thread","Video","Post","Document"];
+const POST_TYPES = ["Reel","Carousel","Static","Story","Trial Reel","Thread","Video","Post","Document"];
 const ACOL = ["#6366F1","#EC4899","#14B8A6","#F59E0B","#8B5CF6","#EF4444","#0EA5E9","#D97706","#3B82F6","#10B981","#F97316"];
 
 // ─── Team ────────────────────────────────────────────────────────────────────
@@ -86,7 +92,7 @@ const initPosts = () => {
     const off=Math.floor(Math.random()*35)-12; const d=new Date(td); d.setDate(d.getDate()+off);
     const pl=pk[i%4]; const ows=chOwners[pl]; const ow=TEAM[ows[Math.floor(Math.random()*ows.length)]-1]||TEAM[0];
     const st=off<-4?"published":off<-1?(Math.random()>.3?"published":"approved"):off<3?["draft","in_review","approved"][Math.floor(Math.random()*3)]:"draft";
-    posts.push({ id:i+1, platform:pl, postType:POST_TYPES[Math.floor(Math.random()*POST_TYPES.length)], postDate:d.toISOString().split("T")[0], caption:captions[i%captions.length], status:st, owner:ow, campaign:["Founder Brand","Education","Thought Leadership","Community"][Math.floor(Math.random()*4)],
+    posts.push({ id:i+1, platform:pl, postType:POST_TYPES[Math.floor(Math.random()*POST_TYPES.length)], postDate:d.toISOString().split("T")[0], caption:captions[i%captions.length], status:st, owner:ow,
       links:{ draft:i%3===0?"https://docs.google.com/doc/d/1xK...":null, canva:i%2===0?"https://canva.com/design/DAGx...":null, asset:i%5===0?"https://drive.google.com/file/...":null, live:st==="published"?`https://${pl}.com/p/${(i*7919).toString(36)}`:null },
       metrics:st==="published"?{impressions:Math.floor(Math.random()*50000)+1000,engagement:(Math.random()*8+1).toFixed(1),followers:Math.floor(Math.random()*200)-30}:null,
       threads:[{id:1,user:ow,text:"Draft is ready for review. Updated brand colors and CTA placement.",time:new Date(2026,1,9,10,0).getTime()},{id:2,user:TEAM[0],text:"Looks great — can we make the hook stronger?",time:new Date(2026,1,9,11,0).getTime()}],
@@ -104,7 +110,7 @@ const initChats = () => ({
   youtube:[{id:1,user:TEAM[9],text:"Need the thumbnail for the explainer video by Thursday. @Parth?",time:new Date(2026,1,7,11,0).getTime()},{id:2,user:TEAM[10],text:"On it. Two options by tomorrow EOD.",time:new Date(2026,1,7,12,0).getTime()},{id:3,user:TEAM[0],text:"Rahul, let's prep description and tags. SEO is key for this one.",time:new Date(2026,1,8,10,0).getTime(),pinned:true}],
   x:[{id:1,user:TEAM[8],text:"Posted the deal sourcing thread. 5 tweets with different tactics.",time:new Date(2026,1,8,9,0).getTime()},{id:2,user:TEAM[0],text:"Nice! Quote tweet the first one from the brand account.",time:new Date(2026,1,8,10,0).getTime(),pinned:true},{id:3,user:TEAM[8],text:"Done. Also drafted a thread for next week on SMB valuations.",time:new Date(2026,1,9,8,0).getTime()}],
 });
-const DEMO_CSV = `platform,post_type,post_date,caption,owner,canva_link,draft_link,status,campaign\nInstagram,Reel,2026-03-05,"Founder insight: Why I chose micro search funds",Dev Shah,https://canva.com/design/example1,https://docs.google.com/doc/example1,Draft,Founder Brand\nInstagram,Carousel,2026-03-07,"5 KPIs every search fund investor should track",Aryan Solanki,https://canva.com/design/example2,https://docs.google.com/doc/example2,Draft,Education\nLinkedIn,Post,2026-03-08,"Weekly insight: What makes a great operator?",Yash,,https://docs.google.com/doc/example3,In Review,Thought Leadership\nLinkedIn,Document,2026-03-12,"Search Fund 101 - Complete Guide PDF",Dev Shah,https://canva.com/design/example4,,Draft,Education\nYouTube,Video,2026-03-10,"Search Fund Explained in 10 Minutes",Rahul Mahto,https://canva.com/design/example5,https://docs.google.com/doc/example5,Draft,Education\nYouTube,Video,2026-03-15,"Day in the Life of a Search Fund Founder",Rahul Mahto,,,Draft,Founder Brand\nX,Thread,2026-03-06,"Hot take: Why PE firms are losing deals to micro searchers",Pushkar Rathod,,https://docs.google.com/doc/example6,Draft,Thought Leadership\nX,Post,2026-03-09,"Deal sourcing tip of the week",Pushkar Rathod,,,Draft,Community\nInstagram,Static,2026-03-11,"Quote card: The best acquisitions start with operator conviction",Raveena,https://canva.com/design/example7,,Draft,Founder Brand\nInstagram,Reel,2026-03-14,"Behind the scenes: How we run due diligence",Debu,https://canva.com/design/example8,https://docs.google.com/doc/example8,Draft,Education`;
+const DEMO_CSV = `platform,post_type,post_date,caption,owner,canva_link,draft_link,status\nInstagram,Reel,2026-03-05,"Founder insight: Why I chose micro search funds",Dev Shah,https://canva.com/design/example1,https://docs.google.com/doc/example1,Draft\nInstagram,Carousel,2026-03-07,"5 KPIs every search fund investor should track",Aryan Solanki,https://canva.com/design/example2,https://docs.google.com/doc/example2,Draft\nLinkedIn,Post,2026-03-08,"Weekly insight: What makes a great operator?",Yash,,https://docs.google.com/doc/example3,In Review\nLinkedIn,Document,2026-03-12,"Search Fund 101 - Complete Guide PDF",Dev Shah,https://canva.com/design/example4,,Draft\nYouTube,Video,2026-03-10,"Search Fund Explained in 10 Minutes",Rahul Mahto,https://canva.com/design/example5,https://docs.google.com/doc/example5,Draft\nYouTube,Video,2026-03-15,"Day in the Life of a Search Fund Founder",Rahul Mahto,,,Draft\nX,Thread,2026-03-06,"Hot take: Why PE firms are losing deals to micro searchers",Pushkar Rathod,,https://docs.google.com/doc/example6,Draft\nX,Post,2026-03-09,"Deal sourcing tip of the week",Pushkar Rathod,,,Draft\nInstagram,Static,2026-03-11,"Quote card: The best acquisitions start with operator conviction",Raveena,https://canva.com/design/example7,,Draft\nInstagram,Reel,2026-03-14,"Behind the scenes: How we run due diligence",Debu,https://canva.com/design/example8,https://docs.google.com/doc/example8,Draft`;
 
 // ─── Utilities ───────────────────────────────────────────────────────────────
 const fmt=n=>n>=1000?(n/1000).toFixed(1)+"K":""+n;
@@ -352,7 +358,7 @@ function LoginScreen({onLogin}){
 // ─── Add Post Modal ──────────────────────────────────────────────────────────
 function AddPostModal({onClose,onAdd,defaultDate,defaultPlatform}){
   const{user}=useAuth();const ch=getUserChannels(user);
-  const[f,sf]=useState({platform:defaultPlatform||ch[0],postType:"Post",postDate:defaultDate||TODAY,caption:"",campaign:"Founder Brand",owner:user.name,draftLink:"",canvaLink:""});
+  const[f,sf]=useState({platform:defaultPlatform||ch[0],postType:"Post",postDate:defaultDate||TODAY,caption:"",owner:user.name,draftLink:"",canvaLink:""});
   const set=(k,v)=>sf(p=>({...p,[k]:v}));
   const submit=()=>{if(!f.caption.trim()){alert("Caption is required");return;}onAdd(f);onClose();};
   return <div className="modal-overlay" onClick={onClose}><div className="modal" onClick={e=>e.stopPropagation()}>
@@ -361,10 +367,7 @@ function AddPostModal({onClose,onAdd,defaultDate,defaultPlatform}){
       <div className="modal-field"><label>Platform</label><select value={f.platform} onChange={e=>set("platform",e.target.value)}>{ch.map(c=><option key={c} value={c}>{PLATFORMS[c].label}</option>)}</select></div>
       <div className="modal-field"><label>Post Type</label><select value={f.postType} onChange={e=>set("postType",e.target.value)}>{POST_TYPES.map(t=><option key={t}>{t}</option>)}</select></div>
     </div>
-    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
-      <div className="modal-field"><label>Post Date</label><input type="date" value={f.postDate} onChange={e=>set("postDate",e.target.value)}/></div>
-      <div className="modal-field"><label>Campaign</label><select value={f.campaign} onChange={e=>set("campaign",e.target.value)}>{["Founder Brand","Education","Thought Leadership","Community"].map(c=><option key={c}>{c}</option>)}</select></div>
-    </div>
+    <div className="modal-field"><label>Post Date</label><input type="date" value={f.postDate} onChange={e=>set("postDate",e.target.value)}/></div>
     <div className="modal-field"><label>Caption</label><textarea rows={3} placeholder="Write your caption..." value={f.caption} onChange={e=>set("caption",e.target.value)}/></div>
     <div className="modal-field"><label>Owner</label><select value={f.owner} onChange={e=>set("owner",e.target.value)}>{TEAM.filter(t=>canAccess(t,f.platform)).map(t=><option key={t.id} value={t.name}>{t.name} ({t.role})</option>)}</select></div>
     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
@@ -437,7 +440,6 @@ function PostDetail({post,onClose,onThread,onSubmitLive}){
       <div className="panel-section"><div className="panel-section-title">{I.dashboard} Details</div><div className="detail-grid">
         <div className="detail-field"><div className="label">Post Type</div><div className="value">{post.postType}</div></div>
         <div className="detail-field"><div className="label">Post Date</div><div className="value">{post.postDate}</div></div>
-        <div className="detail-field"><div className="label">Campaign</div><div className="value">{post.campaign}</div></div>
         <div className="detail-field"><div className="label">Owner</div><div className="value" style={{display:"flex",alignItems:"center",gap:8}}><AV user={post.owner} size={22}/>{post.owner.name}</div></div>
       </div></div>
       <div className="panel-section"><div className="panel-section-title">{I.link} Links</div>
@@ -599,10 +601,10 @@ function UploadPage({onImport}){
       <p style={{fontSize:13,color:"var(--text3)"}}>Supports .csv files — validates before import</p>
     </div>
     <div style={{marginTop:24,display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}><div className="section-title" style={{marginBottom:0}}>Template Format</div><button className="btn" onClick={downloadDemo}>{I.download} Download Template</button></div>
-    <table className="table"><thead><tr><th>platform</th><th>post_type</th><th>post_date</th><th>caption</th><th>owner</th><th>status</th><th>campaign</th></tr></thead><tbody>
-      <tr><td>Instagram</td><td>Reel</td><td style={{fontFamily:"var(--fm)"}}>2026-03-05</td><td>Founder insight</td><td>Dev Shah</td><td>Draft</td><td>Founder Brand</td></tr>
-      <tr><td>LinkedIn</td><td>Post</td><td style={{fontFamily:"var(--fm)"}}>2026-03-07</td><td>Weekly insight</td><td>Yash</td><td>In Review</td><td>Thought Leadership</td></tr>
-      <tr><td>YouTube</td><td>Video</td><td style={{fontFamily:"var(--fm)"}}>2026-03-10</td><td>Search Fund Explained</td><td>Rahul Mahto</td><td>Draft</td><td>Education</td></tr>
+    <table className="table"><thead><tr><th>platform</th><th>post_type</th><th>post_date</th><th>caption</th><th>owner</th><th>status</th></tr></thead><tbody>
+      <tr><td>Instagram</td><td>Reel</td><td style={{fontFamily:"var(--fm)"}}>2026-03-05</td><td>Founder insight</td><td>Dev Shah</td><td>Draft</td></tr>
+      <tr><td>LinkedIn</td><td>Post</td><td style={{fontFamily:"var(--fm)"}}>2026-03-07</td><td>Weekly insight</td><td>Yash</td><td>In Review</td></tr>
+      <tr><td>YouTube</td><td>Video</td><td style={{fontFamily:"var(--fm)"}}>2026-03-10</td><td>Search Fund Explained</td><td>Rahul Mahto</td><td>Draft</td></tr>
     </tbody></table>
     <div style={{marginTop:14,padding:"14px 18px",background:"var(--card2)",borderRadius:"var(--rs)",fontSize:13,color:"var(--text2)",lineHeight:1.6,border:"1px solid var(--border)"}}><strong style={{color:"var(--text)"}}>Validation:</strong> Platform names checked · Date format YYYY-MM-DD · URLs must start with https:// · Empty captions flagged · Fix errors before confirming</div>
   </div>;
@@ -642,24 +644,155 @@ function ChannelPage({platform,sel,posts,onAddPost}){
   </div>;
 }
 
-// ─── App ─────────────────────────────────────────────────────────────────────
+// ─── App ─────────────────────────────────────────────────────────────────
+// Helper: transform Supabase row into component format
+const transformPost = (p, teamMap) => {
+  const ow = teamMap[p.owner_id] || { id: p.owner_id, name: "Unknown", avatar: "??", role: "", channels: [], isAdmin: false };
+  const links = {};
+  (p.links || []).forEach(l => {
+    if (l.link_type === "draft") links.draft = l.url;
+    else if (l.link_type === "edit") links.canva = l.url;
+    else if (l.link_type === "asset") links.asset = l.url;
+    else if (l.link_type === "live") links.live = l.url;
+  });
+  const m = (p.metrics || [])[0];
+  return {
+    id: p.id, platform: p.platform, postType: p.post_type, postDate: p.post_date, caption: p.caption, status: p.status, owner: ow,
+    links: { draft: links.draft || null, canva: links.canva || null, asset: links.asset || null, live: links.live || null },
+    metrics: m ? { impressions: m.impressions, engagement: m.engagement_rate, followers: m.follower_change } : null,
+    threads: (p.comments || []).map(c => ({ id: c.id, user: teamMap[c.user_id] || { name: "Unknown", avatar: "??" }, text: c.content, time: new Date(c.created_at).getTime() })),
+    approvalLog: (p.approval_logs || []).map(a => ({ by: teamMap[a.performed_by]?.name || "Unknown", at: new Date(a.created_at).toLocaleString(), action: a.action })),
+    auditLog: (p.audit_logs || []).map(a => ({ action: a.action, by: teamMap[a.performed_by]?.name || "Unknown", at: new Date(a.created_at).toLocaleString() })),
+    tasks: (p.tasks || []).map(t => ({ id: t.id, type: t.task_type, assignee: teamMap[t.assignee_id] || { name: "Unknown", avatar: "??" }, dueDate: t.due_date, status: t.status })),
+  };
+};
+
 export default function App(){
   const[page,setPage]=useState("dashboard");const[selPost,setSelPost]=useState(null);const[theme,setTheme]=useState("light");const[user,setUser]=useState(null);
-  const[posts,setPosts]=useState(initPosts);const[chats,setChats]=useState(initChats);
+  const[posts,setPosts]=useState([]);const[chats,setChats]=useState({instagram:[],linkedin:[],youtube:[],x:[]});
+  const[loading,setLoading]=useState(false);const[teamMap,setTeamMap]=useState({});
+
+  // Build team map for lookups
+  useEffect(()=>{
+    const map={};
+    TEAM.forEach(t=>{map[t.id]=t;});
+    if(!sb)return;
+    sb.from("users").select("*").eq("is_active",true).then(({data})=>{
+      if(data)data.forEach(u=>{map[u.id]={id:u.id,name:u.name,role:u.role,avatar:u.avatar,channels:u.channels,isAdmin:u.is_admin,isFreelancer:u.is_freelancer};});
+      setTeamMap(map);
+    });
+  },[]);
+
+  // Fetch posts from Supabase
+  const fetchPosts = useCallback(async ()=>{
+    if(!sb||!user)return;
+    setLoading(true);
+    try{
+      const{data,error}=await sb.from("posts").select(`*,links(*),tasks(*),comments(*),audit_logs(*),approval_logs(*),metrics(*)`).order("post_date",{ascending:true});
+      if(error)throw error;
+      if(data){const tm={...teamMap};setPosts(data.map(p=>transformPost(p,tm)));}
+    }catch(err){console.error("Fetch posts error:",err);}
+    setLoading(false);
+  },[user,teamMap]);
+
+  useEffect(()=>{if(user&&Object.keys(teamMap).length>0)fetchPosts();},[user,teamMap,fetchPosts]);
+
+  // Fetch chats from Supabase
+  const fetchChats = useCallback(async ()=>{
+    if(!sb||!user)return;
+    try{
+      const{data}=await sb.from("chat_messages").select("*").order("created_at");
+      if(data){
+        const grouped={instagram:[],linkedin:[],youtube:[],x:[]};
+        data.forEach(m=>{
+          const u=teamMap[m.user_id]||{name:"Unknown",avatar:"??"};
+          if(grouped[m.channel])grouped[m.channel].push({id:m.id,user:u,text:m.content,time:new Date(m.created_at).getTime(),pinned:m.is_pinned});
+        });
+        setChats(grouped);
+      }
+    }catch(err){console.error("Fetch chats error:",err);}
+  },[user,teamMap]);
+
+  useEffect(()=>{if(user&&Object.keys(teamMap).length>0)fetchChats();},[user,teamMap,fetchChats]);
+
+  // Realtime subscriptions
+  useEffect(()=>{
+    if(!sb||!user)return;
+    const postSub=sb.channel("posts:rt").on("postgres_changes",{event:"*",schema:"public",table:"posts"},()=>fetchPosts()).subscribe();
+    const chatSub=sb.channel("chat:rt").on("postgres_changes",{event:"INSERT",schema:"public",table:"chat_messages"},()=>fetchChats()).subscribe();
+    return()=>{sb.removeChannel(postSub);sb.removeChannel(chatSub);};
+  },[user,fetchPosts,fetchChats]);
 
   const logout=()=>{setUser(null);setPage("dashboard");};
   const login=u=>{setUser(u);if(!u.isAdmin){const ch=getUserChannels(u);setPage(`ch-${ch[0]}`);}};
 
-  const addThread=(postId,text)=>{setPosts(p=>p.map(po=>po.id!==postId?po:{...po,threads:[...po.threads,{id:po.threads.length+1,user,text,time:Date.now()}]}));
-    setSelPost(p=>{if(!p||p.id!==postId)return p;return{...p,threads:[...p.threads,{id:p.threads.length+1,user,text,time:Date.now()}]};});};
-  const submitLive=(postId,url)=>{const now=new Date().toLocaleString();setPosts(p=>p.map(po=>po.id!==postId?po:{...po,status:"published",links:{...po.links,live:url},auditLog:[...po.auditLog,{action:"Live link submitted",by:user.name,at:now}]}));
-    setSelPost(p=>{if(!p||p.id!==postId)return p;return{...p,status:"published",links:{...p.links,live:url},auditLog:[...p.auditLog,{action:"Live link submitted",by:user.name,at:new Date().toLocaleString()}]};});};
-  const addPost=form=>{const ow=TEAM.find(t=>t.name===form.owner)||user;
-    setPosts(p=>[...p,{id:p.length+100+Math.floor(Math.random()*900),platform:form.platform,postType:form.postType,postDate:form.postDate,caption:form.caption,status:"draft",owner:ow,campaign:form.campaign,links:{draft:form.draftLink||null,canva:form.canvaLink||null,asset:null,live:null},metrics:null,threads:[],approvalLog:[],auditLog:[{action:"Created",by:user.name,at:new Date().toLocaleString()}],tasks:[{id:Date.now(),type:"Review",assignee:TEAM[0],dueDate:form.postDate,status:"todo"}]}].sort((a,b)=>a.postDate.localeCompare(b.postDate)));};
-  const importCSV=rows=>{const nw=rows.map((r,i)=>{const pk=Object.entries(PLATFORMS).find(([k,v])=>v.label.toLowerCase()===r.platform?.toLowerCase())?.[0]||"instagram";const ow=TEAM.find(t=>t.name.toLowerCase()===r.owner?.toLowerCase())||user;const sm={"draft":"draft","in review":"in_review","approved":"approved","scheduled":"scheduled","published":"published"};
-    return{id:posts.length+200+i,platform:pk,postType:r.post_type||"Post",postDate:r.post_date,caption:r.caption,status:sm[r.status?.toLowerCase()]||"draft",owner:ow,campaign:r.campaign||"Founder Brand",links:{draft:r.draft_link||null,canva:r.canva_link||null,asset:null,live:null},metrics:null,threads:[],approvalLog:[],auditLog:[{action:"Created via CSV",by:user.name,at:new Date().toLocaleString()}],tasks:[{id:Date.now()+i,type:"Review",assignee:TEAM[0],dueDate:r.post_date,status:"todo"}]};});
-    setPosts(p=>[...p,...nw].sort((a,b)=>a.postDate.localeCompare(b.postDate)));};
-  const sendChat=(platform,text)=>{setChats(p=>({...p,[platform]:[...p[platform],{id:p[platform].length+100,user,text,time:Date.now()}]}));};
+  // Find Supabase user ID from TEAM member
+  const findSbUserId = useCallback((teamMember)=>{
+    const entry = Object.entries(teamMap).find(([_,v])=>v.name===teamMember.name);
+    return entry?entry[0]:null;
+  },[teamMap]);
+
+  const addThread=async(postId,text)=>{
+    if(!sb){setPosts(p=>p.map(po=>po.id!==postId?po:{...po,threads:[...po.threads,{id:po.threads.length+1,user,text,time:Date.now()}]}));
+      setSelPost(p=>{if(!p||p.id!==postId)return p;return{...p,threads:[...p.threads,{id:p.threads.length+1,user,text,time:Date.now()}]};});return;}
+    const uid=findSbUserId(user);if(!uid)return;
+    await sb.from("comments").insert({post_id:postId,user_id:uid,content:text});
+    fetchPosts();
+    setSelPost(p=>{if(!p||p.id!==postId)return p;return{...p,threads:[...p.threads,{id:Date.now(),user,text,time:Date.now()}]};});
+  };
+
+  const submitLive=async(postId,url)=>{
+    if(!sb){const now=new Date().toLocaleString();setPosts(p=>p.map(po=>po.id!==postId?po:{...po,status:"published",links:{...po.links,live:url},auditLog:[...po.auditLog,{action:"Live link submitted",by:user.name,at:now}]}));
+      setSelPost(p=>{if(!p||p.id!==postId)return p;return{...p,status:"published",links:{...p.links,live:url},auditLog:[...p.auditLog,{action:"Live link submitted",by:user.name,at:new Date().toLocaleString()}]};});return;}
+    const uid=findSbUserId(user);if(!uid)return;
+    await sb.from("links").upsert({post_id:postId,link_type:"live",url,is_locked:true,locked_at:new Date().toISOString(),created_by:uid},{onConflict:"post_id,link_type"});
+    await sb.from("posts").update({status:"published"}).eq("id",postId);
+    await sb.from("audit_logs").insert({post_id:postId,action:"Live link submitted",performed_by:uid});
+    fetchPosts();
+    setSelPost(p=>{if(!p||p.id!==postId)return p;return{...p,status:"published",links:{...p.links,live:url}};});
+  };
+
+  const addPost=async(form)=>{
+    const ow=TEAM.find(t=>t.name===form.owner)||user;
+    if(!sb){setPosts(p=>[...p,{id:p.length+100+Math.floor(Math.random()*900),platform:form.platform,postType:form.postType,postDate:form.postDate,caption:form.caption,status:"draft",owner:ow,links:{draft:form.draftLink||null,canva:form.canvaLink||null,asset:null,live:null},metrics:null,threads:[],approvalLog:[],auditLog:[{action:"Created",by:user.name,at:new Date().toLocaleString()}],tasks:[{id:Date.now(),type:"Review",assignee:TEAM[0],dueDate:form.postDate,status:"todo"}]}].sort((a,b)=>a.postDate.localeCompare(b.postDate)));return;}
+    const uid=findSbUserId(user);const owId=findSbUserId(ow);if(!uid)return;
+    const{data:post,error}=await sb.from("posts").insert({platform:form.platform,post_type:form.postType,post_date:form.postDate,caption:form.caption,status:"draft",owner_id:owId||uid}).select().single();
+    if(error){console.error(error);return;}
+    const links=[];
+    if(form.draftLink)links.push({post_id:post.id,link_type:"draft",url:form.draftLink,created_by:uid});
+    if(form.canvaLink)links.push({post_id:post.id,link_type:"edit",url:form.canvaLink,created_by:uid});
+    if(links.length)await sb.from("links").insert(links);
+    await sb.from("tasks").insert({post_id:post.id,task_type:"Review",assignee_id:uid,due_date:form.postDate,status:"todo"});
+    await sb.from("audit_logs").insert({post_id:post.id,action:"Created",performed_by:uid});
+    fetchPosts();
+  };
+
+  const importCSV=async(rows)=>{
+    if(!sb){const nw=rows.map((r,i)=>{const pk=Object.entries(PLATFORMS).find(([k,v])=>v.label.toLowerCase()===r.platform?.toLowerCase())?.[0]||"instagram";const ow=TEAM.find(t=>t.name.toLowerCase()===r.owner?.toLowerCase())||user;const sm={"draft":"draft","in review":"in_review","approved":"approved","scheduled":"scheduled","published":"published"};
+      return{id:posts.length+200+i,platform:pk,postType:r.post_type||"Post",postDate:r.post_date,caption:r.caption,status:sm[r.status?.toLowerCase()]||"draft",owner:ow,links:{draft:r.draft_link||null,canva:r.canva_link||null,asset:null,live:null},metrics:null,threads:[],approvalLog:[],auditLog:[{action:"Created via CSV",by:user.name,at:new Date().toLocaleString()}],tasks:[{id:Date.now()+i,type:"Review",assignee:TEAM[0],dueDate:r.post_date,status:"todo"}]};});
+      setPosts(p=>[...p,...nw].sort((a,b)=>a.postDate.localeCompare(b.postDate)));return;}
+    const uid=findSbUserId(user);if(!uid)return;
+    for(const r of rows){
+      const pk=Object.entries(PLATFORMS).find(([k,v])=>v.label.toLowerCase()===r.platform?.toLowerCase())?.[0]||"instagram";
+      const ow=Object.entries(teamMap).find(([_,v])=>v.name?.toLowerCase()===r.owner?.toLowerCase());
+      const owId=ow?ow[0]:uid;
+      const sm={"draft":"draft","in review":"in_review","approved":"approved","scheduled":"scheduled","published":"published"};
+      const{data:post}=await sb.from("posts").insert({platform:pk,post_type:r.post_type||"Post",post_date:r.post_date,caption:r.caption,status:sm[r.status?.toLowerCase()]||"draft",owner_id:owId}).select().single();
+      if(post){
+        if(r.draft_link)await sb.from("links").insert({post_id:post.id,link_type:"draft",url:r.draft_link,created_by:uid});
+        if(r.canva_link)await sb.from("links").insert({post_id:post.id,link_type:"edit",url:r.canva_link,created_by:uid});
+        await sb.from("audit_logs").insert({post_id:post.id,action:"Created via CSV",performed_by:uid});
+      }
+    }
+    fetchPosts();
+  };
+
+  const sendChat=async(platform,text)=>{
+    if(!sb){setChats(p=>({...p,[platform]:[...p[platform],{id:p[platform].length+100,user,text,time:Date.now()}]}));return;}
+    const uid=findSbUserId(user);if(!uid)return;
+    await sb.from("chat_messages").insert({channel:platform,user_id:uid,content:text});
+    fetchChats();
+  };
 
   const spd=selPost?posts.find(p=>p.id===selPost.id)||selPost:null;
   const ua=user?ALERTS.filter(a=>canAccess(user,a.platform)):[];
