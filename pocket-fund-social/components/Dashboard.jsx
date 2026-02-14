@@ -83,56 +83,10 @@ const getUserChannels = (u) => u.channels[0]==="all" ? Object.keys(PLATFORMS) : 
 const canAccess = (u, ch) => u.channels[0]==="all" || u.channels.includes(ch);
 
 // ─── Data ────────────────────────────────────────────────────────────────────
-const TODAY = "2026-02-09";
-const captions = ["Why micro search funds are the future of SMB acquisitions","3 lessons from our first 6 months of operations","Behind the scenes: Due diligence process breakdown","Founder insight: What I wish I knew before acquiring","Weekly market update: SMB valuations trending upward","How we evaluate management teams in 48 hours","Search fund vs traditional PE — key differences","Our content creation workflow revealed","Top 5 industries for first-time acquirers in 2026","Community AMA recap: Your questions answered","The power of operator-led acquisitions","Deal sourcing strategies that actually work","Thumbnail design tips for business YouTube","LinkedIn algorithm — what changed this quarter","Building in public: Our social media dashboard","Zero to 10K followers in 90 days","The underrated power of long-form LinkedIn posts","Why every founder needs a personal brand strategy","Due diligence checklist — free template download","Lessons from failing at our first acquisition","What LPs look for in emerging fund managers","How to write hooks that stop the scroll","The real cost of running a micro search fund","Q1 performance review across all channels","New series announcement: Fund Fundamentals"];
-const chOwners = { instagram:[3,4,5,6,7], linkedin:[8], youtube:[10,11], x:[9] };
-const initPosts = () => {
-  const posts=[]; const td=new Date(2026,1,9); const pk=Object.keys(PLATFORMS);
-  for(let i=0;i<28;i++){
-    const off=Math.floor(Math.random()*35)-12; const d=new Date(td); d.setDate(d.getDate()+off);
-    const pl=pk[i%4]; const ows=chOwners[pl]; const ow=TEAM[ows[Math.floor(Math.random()*ows.length)]-1]||TEAM[0];
-    const st=off<-4?"published":off<-1?(Math.random()>.3?"published":"approved"):off<3?["draft","in_review","approved"][Math.floor(Math.random()*3)]:"draft";
-    posts.push({ id:i+1, platform:pl, postType:POST_TYPES[Math.floor(Math.random()*POST_TYPES.length)], postDate:d.toISOString().split("T")[0], caption:captions[i%captions.length], status:st, owner:ow,
-      links:{ draft:i%3===0?"https://docs.google.com/doc/d/1xK...":null, canva:i%2===0?"https://canva.com/design/DAGx...":null, asset:i%5===0?"https://drive.google.com/file/...":null, live:st==="published"?`https://${pl}.com/p/${(i*7919).toString(36)}`:null },
-      metrics:st==="published"?{impressions:Math.floor(Math.random()*50000)+1000,engagement:(Math.random()*8+1).toFixed(1),followers:Math.floor(Math.random()*200)-30}:null,
-      threads:[{id:1,user:ow,text:"Draft is ready for review. Updated brand colors and CTA placement.",time:new Date(2026,1,9,10,0).getTime()},{id:2,user:TEAM[0],text:"Looks great — can we make the hook stronger?",time:new Date(2026,1,9,11,0).getTime()}],
-      approvalLog:st==="approved"||st==="published"||st==="scheduled"?[{by:TEAM[0],at:"Feb 7, 2026 3:22 PM",action:"Approved"}]:[],
-      auditLog:[{action:"Created",by:ow.name,at:"Feb 3, 2026 10:00 AM"},{action:"Caption edited",by:ow.name,at:"Feb 4, 2026 2:15 PM"},...(st!=="draft"?[{action:"Submitted for review",by:ow.name,at:"Feb 5, 2026 11:00 AM"}]:[]),...(st==="approved"||st==="published"?[{action:"Approved",by:"Dev Shah",at:"Feb 7, 2026 3:22 PM"}]:[]),...(st==="published"?[{action:"Live link submitted",by:ow.name,at:"Feb 8, 2026 9:00 AM"}]:[])],
-      tasks:[{id:i*10+1,type:TASK_TYPES[Math.floor(Math.random()*TASK_TYPES.length)],assignee:ow,dueDate:d.toISOString().split("T")[0],status:st==="published"?"done":st==="approved"?"done":"in_progress"},{id:i*10+2,type:"Review",assignee:TEAM[0],dueDate:d.toISOString().split("T")[0],status:st==="published"||st==="approved"?"done":"todo"}],
-    });
-  }
-  return posts.sort((a,b)=>a.postDate.localeCompare(b.postDate));
-};
-const ALERTS = [{id:1,type:"overdue",message:"Task overdue: Design carousel for Instagram",post:3,time:"2h ago",platform:"instagram"},{id:2,type:"missing_link",message:"Missing live link: LinkedIn post due yesterday",post:8,time:"5h ago",platform:"linkedin"},{id:3,type:"stuck_draft",message:"Post stuck in Draft 5 days: YouTube video",post:12,time:"1d ago",platform:"youtube"},{id:4,type:"edit_after_approval",message:"Caption edited after approval on Instagram Reel",post:5,time:"30m ago",platform:"instagram"},{id:5,type:"overdue",message:"Review task overdue for X thread post",post:15,time:"3h ago",platform:"x"},{id:6,type:"missing_link",message:"Missing live link: Instagram Carousel from Feb 6",post:2,time:"8h ago",platform:"instagram"}];
-const initChats = () => ({
-  instagram:[{id:1,user:TEAM[2],text:"Team, all reels for this week are in Canva. Please review before Wednesday.",time:new Date(2026,1,7,9,0).getTime(),pinned:true},{id:2,user:TEAM[4],text:"Starting on carousel graphics today — any color preference for Valentine's?",time:new Date(2026,1,7,10,30).getTime()},{id:3,user:TEAM[0],text:"Use the new pink-to-coral gradient from the brand kit.",time:new Date(2026,1,7,11,0).getTime()},{id:4,user:TEAM[5],text:"Video edits for the founder reel are done. Uploading to Drive now.",time:new Date(2026,1,8,14,0).getTime()},{id:5,user:TEAM[3],text:"Can someone review the captions doc? Added this week's copies.",time:new Date(2026,1,9,9,0).getTime()}],
-  linkedin:[{id:1,user:TEAM[7],text:"Published the thought leadership post. 2K impressions in 3 hours.",time:new Date(2026,1,8,16,0).getTime(),pinned:true},{id:2,user:TEAM[0],text:"Great work Yash! Let's double down on long-form.",time:new Date(2026,1,8,17,0).getTime()},{id:3,user:TEAM[7],text:"Next post scheduled for Wednesday — LP expectations draft is in Google Docs.",time:new Date(2026,1,9,10,0).getTime()}],
-  youtube:[{id:1,user:TEAM[9],text:"Need the thumbnail for the explainer video by Thursday. @Parth?",time:new Date(2026,1,7,11,0).getTime()},{id:2,user:TEAM[10],text:"On it. Two options by tomorrow EOD.",time:new Date(2026,1,7,12,0).getTime()},{id:3,user:TEAM[0],text:"Rahul, let's prep description and tags. SEO is key for this one.",time:new Date(2026,1,8,10,0).getTime(),pinned:true}],
-  x:[{id:1,user:TEAM[8],text:"Posted the deal sourcing thread. 5 tweets with different tactics.",time:new Date(2026,1,8,9,0).getTime()},{id:2,user:TEAM[0],text:"Nice! Quote tweet the first one from the brand account.",time:new Date(2026,1,8,10,0).getTime(),pinned:true},{id:3,user:TEAM[8],text:"Done. Also drafted a thread for next week on SMB valuations.",time:new Date(2026,1,9,8,0).getTime()}],
-});
-const DEMO_CSV = `platform,post_type,post_date,caption,owner,canva_link,draft_link,status\nInstagram,Reel,2026-03-05,"Founder insight: Why I chose micro search funds",Dev Shah,https://canva.com/design/example1,https://docs.google.com/doc/example1,Draft\nInstagram,Carousel,2026-03-07,"5 KPIs every search fund investor should track",Aryan Solanki,https://canva.com/design/example2,https://docs.google.com/doc/example2,Draft\nLinkedIn,Post,2026-03-08,"Weekly insight: What makes a great operator?",Yash,,https://docs.google.com/doc/example3,In Review\nLinkedIn,Document,2026-03-12,"Search Fund 101 - Complete Guide PDF",Dev Shah,https://canva.com/design/example4,,Draft\nYouTube,Video,2026-03-10,"Search Fund Explained in 10 Minutes",Rahul Mahto,https://canva.com/design/example5,https://docs.google.com/doc/example5,Draft\nYouTube,Video,2026-03-15,"Day in the Life of a Search Fund Founder",Rahul Mahto,,,Draft\nX,Thread,2026-03-06,"Hot take: Why PE firms are losing deals to micro searchers",Pushkar Rathod,,https://docs.google.com/doc/example6,Draft\nX,Post,2026-03-09,"Deal sourcing tip of the week",Pushkar Rathod,,,Draft\nInstagram,Static,2026-03-11,"Quote card: The best acquisitions start with operator conviction",Raveena,https://canva.com/design/example7,,Draft\nInstagram,Reel,2026-03-14,"Behind the scenes: How we run due diligence",Debu,https://canva.com/design/example8,https://docs.google.com/doc/example8,Draft`;
-
-// ─── Instagram Analytics (Mock — swap with Meta API) ─────────────────────────
-const MOCK_IG = {
-  profile: { username: "microsearchfund", followers: 2847, following: 312, posts: 89 },
-  weeklyGrowth: [
-    { day: "Mon", followers: 2801, reach: 4200, impressions: 6800 },
-    { day: "Tue", followers: 2810, reach: 3800, impressions: 5900 },
-    { day: "Wed", followers: 2818, reach: 5100, impressions: 7400 },
-    { day: "Thu", followers: 2825, reach: 4600, impressions: 6200 },
-    { day: "Fri", followers: 2833, reach: 5800, impressions: 8100 },
-    { day: "Sat", followers: 2840, reach: 3200, impressions: 4800 },
-    { day: "Sun", followers: 2847, reach: 4900, impressions: 7100 },
-  ],
-  recentPosts: [
-    { id:1, type:"Reel", caption:"Why micro search funds are the future", reach:12500, impressions:18200, engagement:4.2, likes:380, comments:47, saves:92, date:"2026-02-03" },
-    { id:2, type:"Carousel", caption:"3 lessons from our first 6 months", reach:8700, impressions:12400, engagement:5.1, likes:290, comments:38, saves:67, date:"2026-02-06" },
-    { id:3, type:"Static", caption:"Founder insight quote card", reach:4200, impressions:6800, engagement:3.8, likes:145, comments:22, saves:31, date:"2026-02-01" },
-    { id:4, type:"Reel", caption:"Due diligence process breakdown", reach:15800, impressions:22400, engagement:6.1, likes:520, comments:63, saves:118, date:"2026-01-28" },
-    { id:5, type:"Carousel", caption:"Top 5 industries for acquirers", reach:9400, impressions:14100, engagement:4.7, likes:310, comments:41, saves:78, date:"2026-01-25" },
-  ],
-  insights: { profileVisits:1240, websiteClicks:387, reach:34500, impressions:52800, engagementRate:4.8, followerGrowth:46 }
-};
+const TODAY = new Date().toISOString().split("T")[0];
+const initPosts = () => [];
+const initChats = () => ({instagram:[],linkedin:[],youtube:[],x:[]});
+const DEMO_CSV = `platform,post_type,post_date,caption,owner,canva_link,draft_link,status\nInstagram,Reel,2026-03-05,"Caption here",Dev Shah,https://canva.com/design/...,https://docs.google.com/...,Draft`;
 
 // ─── Task Priorities ─────────────────────────────────────────────────────────
 const PRIORITIES = {
@@ -140,13 +94,8 @@ const PRIORITIES = {
   normal: { label:"Normal", color:"#4F6EF7", bg:"#EEF2FF", icon:"—" },
   low: { label:"Low", color:"#9CA3AF", bg:"#F3F4F6", icon:"↓" },
 };
-const initStandaloneTasks = () => [
-  { id:"st-1", title:"Update brand kit colors for Q1", description:"Refresh the coral-to-pink gradient across all templates", assignee:TEAM[4], priority:"urgent", status:"in_progress", dueDate:"2026-02-10", platform:null, createdBy:TEAM[0], createdAt:"2026-02-06" },
-  { id:"st-2", title:"Create March content calendar draft", description:"Outline 30 days of posts across all platforms", assignee:TEAM[1], priority:"normal", status:"todo", dueDate:"2026-02-15", platform:null, createdBy:TEAM[0], createdAt:"2026-02-07" },
-  { id:"st-3", title:"Source 10 trending audio clips for Reels", description:"Find trending sounds relevant to finance/business", assignee:TEAM[3], priority:"normal", status:"todo", dueDate:"2026-02-12", platform:"instagram", createdBy:TEAM[2], createdAt:"2026-02-08" },
-  { id:"st-4", title:"LinkedIn article: Search Fund 101", description:"Write long-form article for company page", assignee:TEAM[7], priority:"low", status:"todo", dueDate:"2026-02-20", platform:"linkedin", createdBy:TEAM[0], createdAt:"2026-02-09" },
-  { id:"st-5", title:"Review competitor social accounts", description:"Audit 5 competitor accounts and report insights", assignee:TEAM[8], priority:"urgent", status:"done", dueDate:"2026-02-08", platform:null, createdBy:TEAM[1], createdAt:"2026-02-05" },
-];
+// Helper: who can see all tasks (management)
+const isManager = (u) => u.isAdmin || u.role==="Social Media Head" || u.role.includes("Head");
 
 // ─── Utilities ───────────────────────────────────────────────────────────────
 const fmt=n=>n>=1000?(n/1000).toFixed(1)+"K":""+n;
@@ -489,34 +438,33 @@ function LiveLinkModal({post,onClose,onSubmit}){
 
 // ─── Instagram Analytics ────────────────────────────────────────────────────
 function InstagramAnalyticsPage(){
-  const ig=MOCK_IG;const maxR=Math.max(...ig.weeklyGrowth.map(d=>d.reach));const maxImp=Math.max(...ig.weeklyGrowth.map(d=>d.impressions));
   return<div>
-    <div className="page-h"><div><h2>Instagram Analytics</h2><div className="page-h-sub">@{ig.profile.username} — Performance overview</div></div></div>
-    <div className="ig-connect-banner"><div><h4>Connect Live Instagram Data</h4><p>Link your Meta Business account to see real-time analytics. Currently showing sample data.</p></div><button className="ig-connect-btn">{I.link} Connect Meta API</button></div>
+    <div className="page-h"><div><h2>Instagram Analytics</h2><div className="page-h-sub">@microsearchfund — Connect to see live data</div></div></div>
+    <div className="ig-connect-banner"><div><h4>Connect Your Instagram Account</h4><p>Link your Meta Business account to see followers, reach, impressions, engagement and more.</p></div><button className="ig-connect-btn" onClick={()=>window.open("https://developers.facebook.com","_blank")}>{I.link} Setup Meta API</button></div>
     <div className="ig-profile">
       <div className="ig-avatar">MSF</div>
-      <div className="ig-info"><div className="ig-username">Micro Search Fund <svg width="16" height="16" viewBox="0 0 24 24" fill="#4F6EF7"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><div className="ig-handle">@{ig.profile.username}</div>
-        <div className="ig-stats-row"><div className="ig-stat"><div className="n">{fmt(ig.profile.posts)}</div><div className="l">Posts</div></div><div className="ig-stat"><div className="n">{fmt(ig.profile.followers)}</div><div className="l">Followers</div></div><div className="ig-stat"><div className="n">{fmt(ig.profile.following)}</div><div className="l">Following</div></div></div>
+      <div className="ig-info"><div className="ig-username">Micro Search Fund</div><div className="ig-handle">@microsearchfund</div>
+        <div className="ig-stats-row"><div className="ig-stat"><div className="n">—</div><div className="l">Posts</div></div><div className="ig-stat"><div className="n">—</div><div className="l">Followers</div></div><div className="ig-stat"><div className="n">—</div><div className="l">Following</div></div></div>
       </div>
-      <div className="ig-badge"><span style={{fontSize:16}}>▲</span> +{ig.insights.followerGrowth} this week</div>
     </div>
     <div className="stats-grid">
-      <div className="stat-card" data-accent="purple"><div className="stat-label">Total Reach</div><div className="stat-value">{fmt(ig.insights.reach)}</div><span className="stat-change up">{I.arrowUp} 18.2%</span></div>
-      <div className="stat-card" data-accent="blue"><div className="stat-label">Impressions</div><div className="stat-value">{fmt(ig.insights.impressions)}</div><span className="stat-change up">{I.arrowUp} 12.5%</span></div>
-      <div className="stat-card" data-accent="green"><div className="stat-label">Engagement Rate</div><div className="stat-value">{ig.insights.engagementRate}%</div><div className="stat-sub">Above industry avg (3.2%)</div></div>
-      <div className="stat-card" data-accent="amber"><div className="stat-label">Profile Visits</div><div className="stat-value">{fmt(ig.insights.profileVisits)}</div><div className="stat-sub">{ig.insights.websiteClicks} website clicks</div></div>
+      <div className="stat-card" data-accent="purple"><div className="stat-label">Total Reach</div><div className="stat-value">—</div><div className="stat-sub">Connect to see data</div></div>
+      <div className="stat-card" data-accent="blue"><div className="stat-label">Impressions</div><div className="stat-value">—</div><div className="stat-sub">Connect to see data</div></div>
+      <div className="stat-card" data-accent="green"><div className="stat-label">Engagement Rate</div><div className="stat-value">—</div><div className="stat-sub">Connect to see data</div></div>
+      <div className="stat-card" data-accent="amber"><div className="stat-label">Profile Visits</div><div className="stat-value">—</div><div className="stat-sub">Connect to see data</div></div>
     </div>
     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20,marginBottom:24}}>
-      <div className="ig-chart-wrap"><div className="ig-chart-title"><span>Weekly Reach</span><span style={{fontSize:11,color:"var(--text3)",fontFamily:"var(--fm)"}}>Last 7 days</span></div><div className="ig-bar-chart">{ig.weeklyGrowth.map(d=><div key={d.day} className="ig-bar-col"><div className="ig-bar-val">{fmt(d.reach)}</div><div className="ig-bar" style={{height:`${(d.reach/maxR)*90}%`,background:"linear-gradient(180deg,#4F6EF7,#8B5CF6)"}}/><div className="ig-bar-label">{d.day}</div></div>)}</div></div>
-      <div className="ig-chart-wrap"><div className="ig-chart-title"><span>Weekly Impressions</span><span style={{fontSize:11,color:"var(--text3)",fontFamily:"var(--fm)"}}>Last 7 days</span></div><div className="ig-bar-chart">{ig.weeklyGrowth.map(d=><div key={d.day} className="ig-bar-col"><div className="ig-bar-val">{fmt(d.impressions)}</div><div className="ig-bar" style={{height:`${(d.impressions/maxImp)*90}%`,background:"linear-gradient(180deg,#E4405F,#F59E0B)"}}/><div className="ig-bar-label">{d.day}</div></div>)}</div></div>
+      <div className="ig-chart-wrap"><div className="ig-chart-title"><span>Weekly Reach</span></div><div style={{height:120,display:"flex",alignItems:"center",justifyContent:"center",color:"var(--text3)",fontSize:13}}>No data yet — connect Meta API</div></div>
+      <div className="ig-chart-wrap"><div className="ig-chart-title"><span>Weekly Impressions</span></div><div style={{height:120,display:"flex",alignItems:"center",justifyContent:"center",color:"var(--text3)",fontSize:13}}>No data yet — connect Meta API</div></div>
     </div>
-    <div className="section-title">Recent Post Performance</div>
-    <div className="ig-posts-grid">{ig.recentPosts.map(p=><div key={p.id} className="ig-post-card">
-      <div className="ig-post-head"><span className="ig-post-type" style={{background:p.type==="Reel"?"#FFF1F2":p.type==="Carousel"?"#EEF2FF":"#F3F4F6",color:p.type==="Reel"?"#F43F5E":p.type==="Carousel"?"#4F6EF7":"#6B7280"}}>{p.type}</span><span style={{fontSize:11,color:"var(--text3)",fontFamily:"var(--fm)"}}>{p.date}</span></div>
-      <div style={{fontSize:13,fontWeight:500,color:"var(--text)",marginBottom:6,lineHeight:1.4}}>{p.caption}</div>
-      <div style={{display:"flex",alignItems:"center",gap:12,fontSize:12,color:"var(--text3)",marginBottom:8}}><span>❤️ {p.likes}</span><span>💬 {p.comments}</span><span>🔖 {p.saves}</span></div>
-      <div className="ig-post-metrics"><div className="ig-post-m"><div className="v">{fmt(p.reach)}</div><div className="l">Reach</div></div><div className="ig-post-m"><div className="v">{fmt(p.impressions)}</div><div className="l">Impressions</div></div><div className="ig-post-m"><div className="v" style={{color:p.engagement>=5?"var(--green)":"var(--text)"}}>{p.engagement}%</div><div className="l">Engagement</div></div></div>
-    </div>)}</div>
+    <div className="section-title">How to Connect</div>
+    <div style={{background:"var(--card)",border:"1px solid var(--border)",borderRadius:"var(--rl)",padding:20}}>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:16}}>
+        <div style={{textAlign:"center",padding:16}}><div style={{fontSize:28,marginBottom:8}}>1</div><div style={{fontSize:13,fontWeight:600,color:"var(--text)",marginBottom:4}}>Switch to Business Account</div><div style={{fontSize:12,color:"var(--text3)"}}>Instagram Settings → Account → Switch to Professional</div></div>
+        <div style={{textAlign:"center",padding:16}}><div style={{fontSize:28,marginBottom:8}}>2</div><div style={{fontSize:13,fontWeight:600,color:"var(--text)",marginBottom:4}}>Create Meta Developer App</div><div style={{fontSize:12,color:"var(--text3)"}}>developers.facebook.com → Create App → Add Instagram Graph API</div></div>
+        <div style={{textAlign:"center",padding:16}}><div style={{fontSize:28,marginBottom:8}}>3</div><div style={{fontSize:13,fontWeight:600,color:"var(--text)",marginBottom:4}}>Add API Keys to .env</div><div style={{fontSize:12,color:"var(--text3)"}}>NEXT_PUBLIC_META_ACCESS_TOKEN and INSTAGRAM_ACCOUNT_ID</div></div>
+      </div>
+    </div>
   </div>;
 }
 
@@ -551,7 +499,7 @@ function Sidebar({page,nav,alertCount,posts}){
     <div className="sb-logo"><div className="sb-logo-row"><div className="sb-logo-icon">{I.zap}</div><h1>Pocket Fund</h1></div><p>Social Command Center</p></div>
     <div className="sb-section">
       <div className="sb-label">Overview</div>
-      {user.isAdmin&&<div className={`sb-item ${page==="dashboard"?"active":""}`} onClick={()=>nav("dashboard")}><span className="icon">{I.dashboard}</span>Dashboard{alertCount>0&&<span className="sb-badge">{alertCount}</span>}</div>}
+      {(user.isAdmin||isManager(user))&&<div className={`sb-item ${page==="dashboard"?"active":""}`} onClick={()=>nav("dashboard")}><span className="icon">{I.dashboard}</span>Dashboard{alertCount>0&&<span className="sb-badge">{alertCount}</span>}</div>}
       <div className={`sb-item ${page==="calendar"?"active":""}`} onClick={()=>nav("calendar")}><span className="icon">{I.calendar}</span>Calendar</div>
       <div className={`sb-item ${page==="posts"?"active":""}`} onClick={()=>nav("posts")}><span className="icon">{I.posts}</span>All Posts</div>
       {(user.isAdmin||user.channels.includes("instagram")||user.channels[0]==="all")&&<div className={`sb-item ${page==="analytics"?"active":""}`} onClick={()=>nav("analytics")}><span className="icon">{I.chart}</span>IG Analytics</div>}
@@ -618,22 +566,33 @@ function PostDetail({post,onClose,onThread,onSubmitLive}){
 }
 
 // ─── Dashboard ───────────────────────────────────────────────────────────────
-function DashboardPage({sel,posts}){
-  const{user}=useAuth();const ua=ALERTS.filter(a=>canAccess(user,a.platform));const up=posts.filter(p=>canAccess(user,p.platform));
+function DashboardPage({sel,posts,standaloneTasks}){
+  const{user}=useAuth();const up=posts.filter(p=>canAccess(user,p.platform));
   const todayP=up.filter(p=>p.postDate===TODAY);const pubTotal=up.filter(p=>p.status==="published").length;
+  const overdue=up.filter(p=>p.postDate<TODAY&&p.status!=="published");
+  const inReview=up.filter(p=>p.status==="in_review");
+  // Compute real alerts from post data
+  const alerts=[];
+  overdue.forEach(p=>alerts.push({id:"od-"+p.id,type:"overdue",message:`Overdue: ${p.caption.slice(0,50)}`,platform:p.platform}));
+  inReview.forEach(p=>alerts.push({id:"rv-"+p.id,type:"missing_link",message:`Awaiting review: ${p.caption.slice(0,50)}`,platform:p.platform}));
+  up.filter(p=>p.status==="draft"&&p.postDate<=TODAY).forEach(p=>alerts.push({id:"sd-"+p.id,type:"stuck_draft",message:`Still in draft: ${p.caption.slice(0,50)}`,platform:p.platform}));
+  const openTasks=(standaloneTasks||[]).filter(t=>t.status!=="done");
+  const todayStr=new Date().toLocaleDateString("en-US",{weekday:"long",year:"numeric",month:"long",day:"numeric"});
   return<div>
-    <div className="page-h"><div><h2>Command Center</h2><div className="page-h-sub">Monday, February 9, 2026 — Welcome back, {user.name.split(" ")[0]}</div></div><div className="page-h-actions"><div className="notif-bell">{I.bell}<span className="notif-count">{ua.length}</span></div></div></div>
+    <div className="page-h"><div><h2>Command Center</h2><div className="page-h-sub">{todayStr} — Welcome back, {user.name.split(" ")[0]}</div></div><div className="page-h-actions">{alerts.length>0&&<div className="notif-bell">{I.bell}<span className="notif-count">{alerts.length}</span></div>}</div></div>
     <div className="stats-grid">
-      <div className="stat-card" data-accent="blue"><div className="stat-label">Today's Posts</div><div className="stat-value">{todayP.length}</div><div className="stat-sub">{todayP.filter(p=>p.status==="published").length} published today</div></div>
-      <div className="stat-card" data-accent="green"><div className="stat-label">Published Total</div><div className="stat-value">{pubTotal}</div><span className="stat-change up">{I.arrowUp} 12.4%</span></div>
-      <div className="stat-card" data-accent="amber"><div className="stat-label">Awaiting Approval</div><div className="stat-value">{up.filter(p=>p.status==="in_review").length}</div><div className="stat-sub">Needs attention</div></div>
-      <div className="stat-card" data-accent="red"><div className="stat-label">Overdue / Blocked</div><div className="stat-value">{up.filter(p=>p.postDate<TODAY&&p.status!=="published").length}</div><span className="stat-change down">{I.arrowDn} Past deadline</span></div>
+      <div className="stat-card" data-accent="blue"><div className="stat-label">Total Posts</div><div className="stat-value">{up.length}</div><div className="stat-sub">{todayP.length} scheduled today</div></div>
+      <div className="stat-card" data-accent="green"><div className="stat-label">Published</div><div className="stat-value">{pubTotal}</div><div className="stat-sub">Across all channels</div></div>
+      <div className="stat-card" data-accent="amber"><div className="stat-label">Awaiting Review</div><div className="stat-value">{inReview.length}</div><div className="stat-sub">{inReview.length>0?"Needs attention":"All clear"}</div></div>
+      <div className="stat-card" data-accent="red"><div className="stat-label">Overdue</div><div className="stat-value">{overdue.length}</div><div className="stat-sub">{overdue.length>0?"Past deadline":"On track"}</div></div>
     </div>
     <div className="section-title">Platform Overview</div>
     <div className="plat-grid">{getUserChannels(user).map(ch=>{const pp=up.filter(p=>p.platform===ch);return<div key={ch} className="plat-card"><div className="plat-card-head"><div className="plat-card-name"><PI platform={ch}/>{PLATFORMS[ch].label}</div><span style={{fontSize:11,color:"var(--text3)",fontFamily:"var(--fm)"}}>{pp.length} posts</span></div><div className="plat-metrics"><div className="plat-m"><div className="v" style={{color:"var(--green)"}}>{pp.filter(p=>p.status==="published").length}</div><div className="l">Live</div></div><div className="plat-m"><div className="v" style={{color:"var(--amber)"}}>{pp.filter(p=>p.status==="in_review").length}</div><div className="l">Review</div></div><div className="plat-m"><div className="v" style={{color:"var(--text3)"}}>{pp.filter(p=>p.status==="draft").length}</div><div className="l">Draft</div></div></div></div>})}</div>
-    <div className="alert-panel"><div className="alert-head"><h3>{I.alert} Alerts ({ua.length})</h3></div>{ua.map(a=><div key={a.id} className="alert-item"><div className={`alert-dot ${a.type}`}/><span className="alert-msg">{a.message}</span><span className="plat-tag" style={{background:PLATFORMS[a.platform].bg,color:PLATFORMS[a.platform].color,fontSize:10}}>{PLATFORMS[a.platform].abbr}</span><span className="alert-time">{a.time}</span></div>)}</div>
-    <div className="section-title">Upcoming Posts</div>
-    <table className="table"><thead><tr><th>Platform</th><th>Caption</th><th>Type</th><th>Date</th><th>Status</th><th>Owner</th></tr></thead><tbody>{up.filter(p=>p.postDate>=TODAY).slice(0,8).map(p=><tr key={p.id} onClick={()=>sel(p)}><td><PT platform={p.platform}/></td><td style={{maxWidth:220,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",color:"var(--text)",fontWeight:500}}>{p.caption}</td><td>{p.postType}</td><td style={{fontFamily:"var(--fm)",fontSize:12}}>{p.postDate}</td><td><SB status={p.status}/></td><td><div style={{display:"flex",alignItems:"center",gap:7}}><AV user={p.owner} size={24}/><span style={{fontSize:12}}>{p.owner.name.split(" ")[0]}</span></div></td></tr>)}</tbody></table>
+    {alerts.length>0&&<div className="alert-panel"><div className="alert-head"><h3>{I.alert} Alerts ({alerts.length})</h3></div>{alerts.slice(0,8).map(a=><div key={a.id} className="alert-item"><div className={`alert-dot ${a.type}`}/><span className="alert-msg">{a.message}</span>{PLATFORMS[a.platform]&&<span className="plat-tag" style={{background:PLATFORMS[a.platform].bg,color:PLATFORMS[a.platform].color,fontSize:10}}>{PLATFORMS[a.platform].abbr}</span>}</div>)}</div>}
+    {openTasks.length>0&&<><div className="section-title">Open Tasks ({openTasks.length})</div>{openTasks.slice(0,5).map(t=><div key={t.id} className="task-card"><div className={`task-card-check ${t.status}`}/><div className="task-card-body"><div className="task-card-title">{t.title}</div><div className="task-card-meta"><span className="priority-badge" style={{background:PRIORITIES[t.priority].bg,color:PRIORITIES[t.priority].color}}>{PRIORITIES[t.priority].label}</span><div className="task-meta-chip"><AV user={t.assignee} size={18}/>{t.assignee.name.split(" ")[0]}</div><div className="task-meta-chip">{I.clock} {t.dueDate}</div></div></div><TSB status={t.status}/></div>)}</>}
+    <div className="section-title" style={{marginTop:24}}>Upcoming Posts</div>
+    {up.filter(p=>p.postDate>=TODAY).length===0?<div className="empty-state"><p style={{fontSize:15,fontWeight:500,marginBottom:4}}>No upcoming posts</p><p style={{fontSize:13}}>Create your first post from Calendar or All Posts</p></div>:
+    <table className="table"><thead><tr><th>Platform</th><th>Caption</th><th>Type</th><th>Date</th><th>Status</th><th>Owner</th></tr></thead><tbody>{up.filter(p=>p.postDate>=TODAY).slice(0,8).map(p=><tr key={p.id} onClick={()=>sel(p)}><td><PT platform={p.platform}/></td><td style={{maxWidth:220,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",color:"var(--text)",fontWeight:500}}>{p.caption}</td><td>{p.postType}</td><td style={{fontFamily:"var(--fm)",fontSize:12}}>{p.postDate}</td><td><SB status={p.status}/></td><td><div style={{display:"flex",alignItems:"center",gap:7}}><AV user={p.owner} size={24}/><span style={{fontSize:12}}>{p.owner.name.split(" ")[0]}</span></div></td></tr>)}</tbody></table>}
   </div>;
 }
 
@@ -682,24 +641,30 @@ function PostsPage({sel,posts,onAddPost}){
 // ─── Tasks ───────────────────────────────────────────────────────────────────
 function TasksPage({sel,posts,standaloneTasks,onAddTask,onToggleTask}){
   const{user}=useAuth();const[tf,setTf]=useState("all");const[tab,setTab]=useState("all");const[showAdd,setShowAdd]=useState(false);
-  const canCreate=user.isAdmin||user.role.includes("Head");
-  const postTasks=posts.filter(p=>canAccess(user,p.platform)).flatMap(p=>p.tasks.map(t=>({...t,post:p,source:"post",priority:"normal"})));
-  const stTasks=(standaloneTasks||[]).filter(t=>user.isAdmin||user.channels[0]==="all"||!t.platform||user.channels.includes(t.platform)).map(t=>({...t,source:"standalone"}));
-  const allT=tab==="standalone"?stTasks:tab==="post"?postTasks:[...stTasks,...postTasks];
-  const filtered=tf==="all"?allT:allT.filter(t=>t.status===tf);
+  const mgr=isManager(user);
+  // Post tasks: managers see all, others see only tasks assigned to them
+  const allPostTasks=posts.filter(p=>canAccess(user,p.platform)).flatMap(p=>p.tasks.map(t=>({...t,post:p,source:"post",priority:"normal"})));
+  const postTasks=mgr?allPostTasks:allPostTasks.filter(t=>t.assignee.name===user.name);
+  // Standalone tasks: managers see all, others see only their own
+  const allStTasks=(standaloneTasks||[]);
+  const stTasks=mgr?allStTasks:allStTasks.filter(t=>t.assignee.name===user.name);
+  const combined=tab==="standalone"?stTasks:tab==="post"?postTasks:[...stTasks,...postTasks];
+  const filtered=tf==="all"?combined:combined.filter(t=>t.status===tf);
   const PB=({priority})=>{const p=PRIORITIES[priority||"normal"];return<span className="priority-badge" style={{background:p.bg,color:p.color}}>{p.label}</span>;};
+  const totalOpen=[...stTasks,...postTasks].filter(t=>t.status!=="done").length;
   return<div>
-    <div className="page-h"><div><h2>Tasks</h2><div className="page-h-sub">{postTasks.length+stTasks.length} total — {stTasks.filter(t=>t.status!=="done").length} standalone open</div></div>{canCreate&&<div className="page-h-actions"><button className="btn btn-p" onClick={()=>setShowAdd(true)}>{I.plus} Assign Task</button></div>}</div>
-    <div className="tabs"><div className={`tab ${tab==="all"?"active":""}`} onClick={()=>setTab("all")}>All ({postTasks.length+stTasks.length})</div><div className={`tab ${tab==="standalone"?"active":""}`} onClick={()=>setTab("standalone")}>Standalone ({stTasks.length})</div><div className={`tab ${tab==="post"?"active":""}`} onClick={()=>setTab("post")}>Post Tasks ({postTasks.length})</div></div>
-    <div className="filter-bar"><div className={`filter-chip ${tf==="all"?"active":""}`} onClick={()=>setTf("all")}>All</div>{Object.entries(TASK_STATUSES).map(([k,v])=><div key={k} className={`filter-chip ${tf===k?"active":""}`} onClick={()=>setTf(k)}>{v} ({allT.filter(t=>t.status===k).length})</div>)}</div>
-    {tab!=="post"&&stTasks.length>0&&(tf==="all"?stTasks:stTasks.filter(t=>t.status===tf)).map(t=><div key={t.id} className="task-card" onClick={()=>onToggleTask&&onToggleTask(t.id)}>
+    <div className="page-h"><div><h2>{mgr?"All Tasks":"My Tasks"}</h2><div className="page-h-sub">{totalOpen} open · {stTasks.length+postTasks.length} total{!mgr?" assigned to you":""}</div></div>{mgr&&<div className="page-h-actions"><button className="btn btn-p" onClick={()=>setShowAdd(true)}>{I.plus} Assign Task</button></div>}</div>
+    <div className="tabs"><div className={`tab ${tab==="all"?"active":""}`} onClick={()=>setTab("all")}>All ({stTasks.length+postTasks.length})</div><div className={`tab ${tab==="standalone"?"active":""}`} onClick={()=>setTab("standalone")}>Assigned ({stTasks.length})</div><div className={`tab ${tab==="post"?"active":""}`} onClick={()=>setTab("post")}>Post Tasks ({postTasks.length})</div></div>
+    <div className="filter-bar"><div className={`filter-chip ${tf==="all"?"active":""}`} onClick={()=>setTf("all")}>All</div>{Object.entries(TASK_STATUSES).map(([k,v])=><div key={k} className={`filter-chip ${tf===k?"active":""}`} onClick={()=>setTf(k)}>{v} ({combined.filter(t=>t.status===k).length})</div>)}</div>
+    {filtered.length===0&&<div className="empty-state"><p style={{fontSize:15,fontWeight:500,marginBottom:4}}>{tf==="all"?"No tasks yet":"No tasks with this status"}</p><p style={{fontSize:13}}>{mgr?"Assign a task to get started":"You're all clear!"}</p></div>}
+    {tab!=="post"&&(tf==="all"?stTasks:stTasks.filter(t=>t.status===tf)).map(t=><div key={t.id} className="task-card" onClick={()=>onToggleTask&&onToggleTask(t.id)}>
       <div className={`task-card-check ${t.status}`}>{t.status==="done"&&<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round"><path d="M5 13l4 4L19 7"/></svg>}{t.status==="in_progress"&&<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round"><path d="M5 12h14"/></svg>}</div>
       <div className="task-card-body"><div className={`task-card-title ${t.status==="done"?"done":""}`}>{t.title}</div>{t.description&&<div className="task-card-desc">{t.description}</div>}
-        <div className="task-card-meta"><PB priority={t.priority}/><div className="task-meta-chip"><AV user={t.assignee} size={18}/>{t.assignee.name.split(" ")[0]}</div><div className="task-meta-chip">{I.clock} {t.dueDate}</div>{t.platform&&<div className="task-meta-chip"><span className="sb-dot" style={{background:PLATFORMS[t.platform]?.color,width:6,height:6}}/>{PLATFORMS[t.platform]?.label}</div>}<div className="task-meta-chip">by {t.createdBy.name.split(" ")[0]}</div></div>
+        <div className="task-card-meta"><PB priority={t.priority}/>{mgr&&<div className="task-meta-chip"><AV user={t.assignee} size={18}/>{t.assignee.name.split(" ")[0]}</div>}<div className="task-meta-chip">{I.clock} {t.dueDate}</div>{t.platform&&<div className="task-meta-chip"><span className="sb-dot" style={{background:PLATFORMS[t.platform]?.color,width:6,height:6}}/>{PLATFORMS[t.platform]?.label}</div>}{mgr&&t.createdBy&&<div className="task-meta-chip">by {t.createdBy.name.split(" ")[0]}</div>}</div>
       </div><TSB status={t.status}/>
     </div>)}
-    {tab!=="standalone"&&<table className="table" style={{marginTop:tab==="all"&&stTasks.length>0?16:0}}><thead><tr><th>Task</th><th>Post</th><th>Platform</th><th>Assigned To</th><th>Due Date</th><th>Status</th></tr></thead>
-      <tbody>{(tf==="all"?postTasks:postTasks.filter(t=>t.status===tf)).map(t=><tr key={t.id} onClick={()=>sel(t.post)}><td style={{color:"var(--text)",fontWeight:500}}>{t.type}</td><td style={{maxWidth:180,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t.post.caption.slice(0,35)}</td><td><PT platform={t.post.platform}/></td><td><div style={{display:"flex",alignItems:"center",gap:7}}><AV user={t.assignee} size={24}/><span style={{fontSize:12}}>{t.assignee.name.split(" ")[0]}</span></div></td><td style={{fontFamily:"var(--fm)",fontSize:12}}>{t.dueDate}</td><td><TSB status={t.status}/></td></tr>)}</tbody></table>}
+    {tab!=="standalone"&&postTasks.length>0&&<table className="table" style={{marginTop:tab==="all"&&stTasks.length>0?16:0}}><thead><tr><th>Task</th><th>Post</th><th>Platform</th>{mgr&&<th>Assigned To</th>}<th>Due Date</th><th>Status</th></tr></thead>
+      <tbody>{(tf==="all"?postTasks:postTasks.filter(t=>t.status===tf)).map(t=><tr key={t.id} onClick={()=>sel(t.post)}><td style={{color:"var(--text)",fontWeight:500}}>{t.type}</td><td style={{maxWidth:180,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t.post.caption.slice(0,35)}</td><td><PT platform={t.post.platform}/></td>{mgr&&<td><div style={{display:"flex",alignItems:"center",gap:7}}><AV user={t.assignee} size={24}/><span style={{fontSize:12}}>{t.assignee.name.split(" ")[0]}</span></div></td>}<td style={{fontFamily:"var(--fm)",fontSize:12}}>{t.dueDate}</td><td><TSB status={t.status}/></td></tr>)}</tbody></table>}
     {showAdd&&<AssignTaskModal onClose={()=>setShowAdd(false)} onAdd={onAddTask}/>}
   </div>;
 }
@@ -834,7 +799,7 @@ export default function App(){
   const[page,setPage]=useState("dashboard");const[selPost,setSelPost]=useState(null);const[theme,setTheme]=useState("light");const[user,setUser]=useState(null);
   const[posts,setPosts]=useState([]);const[chats,setChats]=useState({instagram:[],linkedin:[],youtube:[],x:[]});
   const[loading,setLoading]=useState(false);const[teamMap,setTeamMap]=useState({});
-  const[standaloneTasks,setStandaloneTasks]=useState(initStandaloneTasks);
+  const[standaloneTasks,setStandaloneTasks]=useState([]);
 
   // Build team map for lookups
   useEffect(()=>{
@@ -888,8 +853,7 @@ export default function App(){
   },[user,fetchPosts,fetchChats]);
 
   const logout=()=>{setUser(null);setPage("dashboard");};
-  const login=u=>{setUser(u);if(!u.isAdmin){const ch=getUserChannels(u);setPage(`ch-${ch[0]}`);}};
-
+  const login=u=>{setUser(u);if(!u.isAdmin&&!isManager(u)){const ch=getUserChannels(u);setPage(`ch-${ch[0]}`);}else{setPage("dashboard");}};
   // Find Supabase user ID from TEAM member
   const findSbUserId = useCallback((teamMember)=>{
     const entry = Object.entries(teamMap).find(([_,v])=>v.name===teamMember.name);
@@ -967,10 +931,11 @@ export default function App(){
   };
 
   const spd=selPost?posts.find(p=>p.id===selPost.id)||selPost:null;
-  const ua=user?ALERTS.filter(a=>canAccess(user,a.platform)):[];
+  // Compute real alert count from actual post data
+  const alertCount=user?posts.filter(p=>canAccess(user,p.platform)&&((p.postDate<TODAY&&p.status!=="published")||p.status==="in_review"||(p.status==="draft"&&p.postDate<=TODAY))).length:0;
 
   const render=()=>{if(!user)return null;
-    if(page==="dashboard"&&user.isAdmin)return<DashboardPage sel={setSelPost} posts={posts}/>;
+    if(page==="dashboard"&&(user.isAdmin||isManager(user)))return<DashboardPage sel={setSelPost} posts={posts} standaloneTasks={standaloneTasks}/>;
     if(page==="calendar")return<CalendarPage sel={setSelPost} posts={posts} onAddPost={addPost}/>;
     if(page==="posts")return<PostsPage sel={setSelPost} posts={posts} onAddPost={addPost}/>;
     if(page==="approvals")return<ApprovalsPage sel={setSelPost} posts={posts}/>;
@@ -986,7 +951,7 @@ export default function App(){
   return<ThemeContext.Provider value={{theme,setTheme}}><AuthContext.Provider value={{user,logout}}>
     <style>{CSS}</style>
     <div data-theme={theme} style={{minHeight:"100vh",background:"var(--bg)"}}>
-      {!user?<LoginScreen onLogin={login}/>:<div className="app"><Sidebar page={page} nav={setPage} alertCount={ua.length} posts={posts}/><main className="main">{render()}</main></div>}
+      {!user?<LoginScreen onLogin={login}/>:<div className="app"><Sidebar page={page} nav={setPage} alertCount={alertCount} posts={posts}/><main className="main">{render()}</main></div>}
       {spd&&<PostDetail post={spd} onClose={()=>setSelPost(null)} onThread={addThread} onSubmitLive={submitLive}/>}
     </div>
   </AuthContext.Provider></ThemeContext.Provider>;
