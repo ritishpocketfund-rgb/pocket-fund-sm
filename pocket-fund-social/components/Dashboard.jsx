@@ -112,6 +112,42 @@ const initChats = () => ({
 });
 const DEMO_CSV = `platform,post_type,post_date,caption,owner,canva_link,draft_link,status\nInstagram,Reel,2026-03-05,"Founder insight: Why I chose micro search funds",Dev Shah,https://canva.com/design/example1,https://docs.google.com/doc/example1,Draft\nInstagram,Carousel,2026-03-07,"5 KPIs every search fund investor should track",Aryan Solanki,https://canva.com/design/example2,https://docs.google.com/doc/example2,Draft\nLinkedIn,Post,2026-03-08,"Weekly insight: What makes a great operator?",Yash,,https://docs.google.com/doc/example3,In Review\nLinkedIn,Document,2026-03-12,"Search Fund 101 - Complete Guide PDF",Dev Shah,https://canva.com/design/example4,,Draft\nYouTube,Video,2026-03-10,"Search Fund Explained in 10 Minutes",Rahul Mahto,https://canva.com/design/example5,https://docs.google.com/doc/example5,Draft\nYouTube,Video,2026-03-15,"Day in the Life of a Search Fund Founder",Rahul Mahto,,,Draft\nX,Thread,2026-03-06,"Hot take: Why PE firms are losing deals to micro searchers",Pushkar Rathod,,https://docs.google.com/doc/example6,Draft\nX,Post,2026-03-09,"Deal sourcing tip of the week",Pushkar Rathod,,,Draft\nInstagram,Static,2026-03-11,"Quote card: The best acquisitions start with operator conviction",Raveena,https://canva.com/design/example7,,Draft\nInstagram,Reel,2026-03-14,"Behind the scenes: How we run due diligence",Debu,https://canva.com/design/example8,https://docs.google.com/doc/example8,Draft`;
 
+// ─── Instagram Analytics (Mock — swap with Meta API) ─────────────────────────
+const MOCK_IG = {
+  profile: { username: "microsearchfund", followers: 2847, following: 312, posts: 89 },
+  weeklyGrowth: [
+    { day: "Mon", followers: 2801, reach: 4200, impressions: 6800 },
+    { day: "Tue", followers: 2810, reach: 3800, impressions: 5900 },
+    { day: "Wed", followers: 2818, reach: 5100, impressions: 7400 },
+    { day: "Thu", followers: 2825, reach: 4600, impressions: 6200 },
+    { day: "Fri", followers: 2833, reach: 5800, impressions: 8100 },
+    { day: "Sat", followers: 2840, reach: 3200, impressions: 4800 },
+    { day: "Sun", followers: 2847, reach: 4900, impressions: 7100 },
+  ],
+  recentPosts: [
+    { id:1, type:"Reel", caption:"Why micro search funds are the future", reach:12500, impressions:18200, engagement:4.2, likes:380, comments:47, saves:92, date:"2026-02-03" },
+    { id:2, type:"Carousel", caption:"3 lessons from our first 6 months", reach:8700, impressions:12400, engagement:5.1, likes:290, comments:38, saves:67, date:"2026-02-06" },
+    { id:3, type:"Static", caption:"Founder insight quote card", reach:4200, impressions:6800, engagement:3.8, likes:145, comments:22, saves:31, date:"2026-02-01" },
+    { id:4, type:"Reel", caption:"Due diligence process breakdown", reach:15800, impressions:22400, engagement:6.1, likes:520, comments:63, saves:118, date:"2026-01-28" },
+    { id:5, type:"Carousel", caption:"Top 5 industries for acquirers", reach:9400, impressions:14100, engagement:4.7, likes:310, comments:41, saves:78, date:"2026-01-25" },
+  ],
+  insights: { profileVisits:1240, websiteClicks:387, reach:34500, impressions:52800, engagementRate:4.8, followerGrowth:46 }
+};
+
+// ─── Task Priorities ─────────────────────────────────────────────────────────
+const PRIORITIES = {
+  urgent: { label:"Urgent", color:"#F43F5E", bg:"#FFF1F2", icon:"!" },
+  normal: { label:"Normal", color:"#4F6EF7", bg:"#EEF2FF", icon:"—" },
+  low: { label:"Low", color:"#9CA3AF", bg:"#F3F4F6", icon:"↓" },
+};
+const initStandaloneTasks = () => [
+  { id:"st-1", title:"Update brand kit colors for Q1", description:"Refresh the coral-to-pink gradient across all templates", assignee:TEAM[4], priority:"urgent", status:"in_progress", dueDate:"2026-02-10", platform:null, createdBy:TEAM[0], createdAt:"2026-02-06" },
+  { id:"st-2", title:"Create March content calendar draft", description:"Outline 30 days of posts across all platforms", assignee:TEAM[1], priority:"normal", status:"todo", dueDate:"2026-02-15", platform:null, createdBy:TEAM[0], createdAt:"2026-02-07" },
+  { id:"st-3", title:"Source 10 trending audio clips for Reels", description:"Find trending sounds relevant to finance/business", assignee:TEAM[3], priority:"normal", status:"todo", dueDate:"2026-02-12", platform:"instagram", createdBy:TEAM[2], createdAt:"2026-02-08" },
+  { id:"st-4", title:"LinkedIn article: Search Fund 101", description:"Write long-form article for company page", assignee:TEAM[7], priority:"low", status:"todo", dueDate:"2026-02-20", platform:"linkedin", createdBy:TEAM[0], createdAt:"2026-02-09" },
+  { id:"st-5", title:"Review competitor social accounts", description:"Audit 5 competitor accounts and report insights", assignee:TEAM[8], priority:"urgent", status:"done", dueDate:"2026-02-08", platform:null, createdBy:TEAM[1], createdAt:"2026-02-05" },
+];
+
 // ─── Utilities ───────────────────────────────────────────────────────────────
 const fmt=n=>n>=1000?(n/1000).toFixed(1)+"K":""+n;
 const fmtTime=ts=>{const d=new Date(ts);const h=d.getHours();const m=d.getMinutes();return `${h>12?h-12:h||12}:${m<10?"0"+m:m} ${h>=12?"PM":"AM"}`;};
@@ -353,6 +389,47 @@ body,#root{font-family:var(--f);background:var(--bg);color:var(--text);min-heigh
 .approval-check{width:22px;height:22px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;box-shadow:0 2px 6px rgba(16,185,129,.3)}
 .pinned-area{padding:10px 20px;background:var(--blue-bg);border-bottom:1px solid var(--border)}
 [data-theme="dark"] .pinned-area{background:rgba(79,110,247,.05)}
+
+/* Instagram Analytics */
+.ig-profile{display:flex;align-items:center;gap:20px;padding:24px;background:var(--card);border:1px solid var(--border);border-radius:var(--rl);margin-bottom:20px;box-shadow:var(--shadow)}
+.ig-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#F58529,#DD2A7B,#8134AF,#515BD4);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;box-shadow:0 4px 16px rgba(221,42,123,.25)}
+.ig-info{flex:1}.ig-username{font-size:18px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px}.ig-handle{font-size:13px;color:var(--text3);margin-top:2px}
+.ig-stats-row{display:flex;gap:28px;margin-top:10px}.ig-stat{text-align:center}.ig-stat .n{font-size:18px;font-weight:800;font-family:var(--fm);color:var(--text)}.ig-stat .l{font-size:11px;color:var(--text3);margin-top:1px}
+.ig-badge{background:linear-gradient(135deg,#F58529,#DD2A7B);color:#fff;padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:5px}
+.ig-chart-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:20px 24px;margin-bottom:20px;box-shadow:var(--shadow)}
+.ig-chart-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.ig-bar-chart{display:flex;align-items:flex-end;gap:8px;height:120px;padding-top:8px}
+.ig-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.ig-bar{width:100%;border-radius:6px 6px 0 0;transition:all .3s ease;min-height:4px;position:relative;cursor:pointer}
+.ig-bar:hover{opacity:.8;transform:scaleY(1.03);transform-origin:bottom}
+.ig-bar-label{font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.3px}
+.ig-bar-val{font-size:10px;font-weight:600;color:var(--text2);font-family:var(--fm)}
+.ig-posts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.ig-post-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:16px;transition:all var(--t);box-shadow:var(--shadow);cursor:default}
+.ig-post-card:hover{box-shadow:var(--shadow-m);transform:translateY(-1px)}
+.ig-post-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.ig-post-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:3px 9px;border-radius:12px}
+.ig-post-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.ig-post-m{text-align:center;padding:8px;background:var(--card2);border-radius:var(--rs)}.ig-post-m .v{font-size:14px;font-weight:700;font-family:var(--fm)}.ig-post-m .l{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-top:2px;font-weight:600}
+.ig-connect-banner{background:linear-gradient(135deg,#F58529 0%,#DD2A7B 50%,#8134AF 100%);border-radius:var(--rl);padding:20px 24px;color:#fff;display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;box-shadow:0 4px 20px rgba(221,42,123,.2)}
+.ig-connect-banner h4{font-size:15px;font-weight:700;margin-bottom:3px}.ig-connect-banner p{font-size:12px;opacity:.85}
+.ig-connect-btn{background:rgba(255,255,255,.2);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.3);color:#fff;padding:9px 18px;border-radius:var(--rs);font-size:13px;font-weight:600;cursor:pointer;transition:all var(--t);white-space:nowrap}.ig-connect-btn:hover{background:rgba(255,255,255,.3)}
+
+/* Task Assignment */
+.task-create-row{display:flex;gap:10px;margin-bottom:20px;align-items:center}
+.priority-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.3px}
+.task-card{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:16px 20px;margin-bottom:8px;display:flex;align-items:flex-start;gap:14px;transition:all var(--t);box-shadow:var(--shadow);cursor:pointer}
+.task-card:hover{box-shadow:var(--shadow-m);transform:translateY(-1px)}
+.task-card-check{width:22px;height:22px;border-radius:7px;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all var(--t);margin-top:2px}
+.task-card-check.done{background:var(--green);border-color:var(--green);color:#fff;box-shadow:0 2px 6px rgba(16,185,129,.3)}
+.task-card-check.in_progress{background:var(--amber);border-color:var(--amber);color:#fff}
+.task-card-check:hover{border-color:var(--blue)}
+.task-card-body{flex:1;min-width:0}
+.task-card-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px}
+.task-card-title.done{text-decoration:line-through;color:var(--text3)}
+.task-card-desc{font-size:12px;color:var(--text3);line-height:1.5;margin-bottom:8px}
+.task-card-meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.task-meta-chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--text3);background:var(--card2);padding:3px 8px;border-radius:12px}
 `;
 
 // ─── Small Components ────────────────────────────────────────────────────────
@@ -410,6 +487,62 @@ function LiveLinkModal({post,onClose,onSubmit}){
   </div></div>;
 }
 
+// ─── Instagram Analytics ────────────────────────────────────────────────────
+function InstagramAnalyticsPage(){
+  const ig=MOCK_IG;const maxR=Math.max(...ig.weeklyGrowth.map(d=>d.reach));const maxImp=Math.max(...ig.weeklyGrowth.map(d=>d.impressions));
+  return<div>
+    <div className="page-h"><div><h2>Instagram Analytics</h2><div className="page-h-sub">@{ig.profile.username} — Performance overview</div></div></div>
+    <div className="ig-connect-banner"><div><h4>Connect Live Instagram Data</h4><p>Link your Meta Business account to see real-time analytics. Currently showing sample data.</p></div><button className="ig-connect-btn">{I.link} Connect Meta API</button></div>
+    <div className="ig-profile">
+      <div className="ig-avatar">MSF</div>
+      <div className="ig-info"><div className="ig-username">Micro Search Fund <svg width="16" height="16" viewBox="0 0 24 24" fill="#4F6EF7"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg></div><div className="ig-handle">@{ig.profile.username}</div>
+        <div className="ig-stats-row"><div className="ig-stat"><div className="n">{fmt(ig.profile.posts)}</div><div className="l">Posts</div></div><div className="ig-stat"><div className="n">{fmt(ig.profile.followers)}</div><div className="l">Followers</div></div><div className="ig-stat"><div className="n">{fmt(ig.profile.following)}</div><div className="l">Following</div></div></div>
+      </div>
+      <div className="ig-badge"><span style={{fontSize:16}}>▲</span> +{ig.insights.followerGrowth} this week</div>
+    </div>
+    <div className="stats-grid">
+      <div className="stat-card" data-accent="purple"><div className="stat-label">Total Reach</div><div className="stat-value">{fmt(ig.insights.reach)}</div><span className="stat-change up">{I.arrowUp} 18.2%</span></div>
+      <div className="stat-card" data-accent="blue"><div className="stat-label">Impressions</div><div className="stat-value">{fmt(ig.insights.impressions)}</div><span className="stat-change up">{I.arrowUp} 12.5%</span></div>
+      <div className="stat-card" data-accent="green"><div className="stat-label">Engagement Rate</div><div className="stat-value">{ig.insights.engagementRate}%</div><div className="stat-sub">Above industry avg (3.2%)</div></div>
+      <div className="stat-card" data-accent="amber"><div className="stat-label">Profile Visits</div><div className="stat-value">{fmt(ig.insights.profileVisits)}</div><div className="stat-sub">{ig.insights.websiteClicks} website clicks</div></div>
+    </div>
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20,marginBottom:24}}>
+      <div className="ig-chart-wrap"><div className="ig-chart-title"><span>Weekly Reach</span><span style={{fontSize:11,color:"var(--text3)",fontFamily:"var(--fm)"}}>Last 7 days</span></div><div className="ig-bar-chart">{ig.weeklyGrowth.map(d=><div key={d.day} className="ig-bar-col"><div className="ig-bar-val">{fmt(d.reach)}</div><div className="ig-bar" style={{height:`${(d.reach/maxR)*90}%`,background:"linear-gradient(180deg,#4F6EF7,#8B5CF6)"}}/><div className="ig-bar-label">{d.day}</div></div>)}</div></div>
+      <div className="ig-chart-wrap"><div className="ig-chart-title"><span>Weekly Impressions</span><span style={{fontSize:11,color:"var(--text3)",fontFamily:"var(--fm)"}}>Last 7 days</span></div><div className="ig-bar-chart">{ig.weeklyGrowth.map(d=><div key={d.day} className="ig-bar-col"><div className="ig-bar-val">{fmt(d.impressions)}</div><div className="ig-bar" style={{height:`${(d.impressions/maxImp)*90}%`,background:"linear-gradient(180deg,#E4405F,#F59E0B)"}}/><div className="ig-bar-label">{d.day}</div></div>)}</div></div>
+    </div>
+    <div className="section-title">Recent Post Performance</div>
+    <div className="ig-posts-grid">{ig.recentPosts.map(p=><div key={p.id} className="ig-post-card">
+      <div className="ig-post-head"><span className="ig-post-type" style={{background:p.type==="Reel"?"#FFF1F2":p.type==="Carousel"?"#EEF2FF":"#F3F4F6",color:p.type==="Reel"?"#F43F5E":p.type==="Carousel"?"#4F6EF7":"#6B7280"}}>{p.type}</span><span style={{fontSize:11,color:"var(--text3)",fontFamily:"var(--fm)"}}>{p.date}</span></div>
+      <div style={{fontSize:13,fontWeight:500,color:"var(--text)",marginBottom:6,lineHeight:1.4}}>{p.caption}</div>
+      <div style={{display:"flex",alignItems:"center",gap:12,fontSize:12,color:"var(--text3)",marginBottom:8}}><span>❤️ {p.likes}</span><span>💬 {p.comments}</span><span>🔖 {p.saves}</span></div>
+      <div className="ig-post-metrics"><div className="ig-post-m"><div className="v">{fmt(p.reach)}</div><div className="l">Reach</div></div><div className="ig-post-m"><div className="v">{fmt(p.impressions)}</div><div className="l">Impressions</div></div><div className="ig-post-m"><div className="v" style={{color:p.engagement>=5?"var(--green)":"var(--text)"}}>{p.engagement}%</div><div className="l">Engagement</div></div></div>
+    </div>)}</div>
+  </div>;
+}
+
+// ─── Assign Task Modal ──────────────────────────────────────────────────────
+function AssignTaskModal({onClose,onAdd}){
+  const{user}=useAuth();const ch=getUserChannels(user);
+  const assignable=TEAM.filter(t=>user.isAdmin||user.channels[0]==="all"||t.channels.some(c=>ch.includes(c)));
+  const[f,sf]=useState({title:"",description:"",assignee:assignable[0]?.name||"",priority:"normal",dueDate:TODAY,platform:"",status:"todo"});
+  const set=(k,v)=>sf(p=>({...p,[k]:v}));
+  const submit=()=>{if(!f.title.trim()){alert("Task title is required");return;}const a=TEAM.find(t=>t.name===f.assignee)||TEAM[0];onAdd({...f,assignee:a,createdBy:user});onClose();};
+  return <div className="modal-overlay" onClick={onClose}><div className="modal" onClick={e=>e.stopPropagation()}>
+    <h3>{I.task} Assign New Task</h3><div className="sub">Create a task and assign it to a team member</div>
+    <div className="modal-field"><label>Task Title</label><input placeholder="e.g. Create March content calendar..." value={f.title} onChange={e=>set("title",e.target.value)}/></div>
+    <div className="modal-field"><label>Description (optional)</label><textarea rows={2} placeholder="Add details or context..." value={f.description} onChange={e=>set("description",e.target.value)}/></div>
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+      <div className="modal-field"><label>Assign To</label><select value={f.assignee} onChange={e=>set("assignee",e.target.value)}>{assignable.map(t=><option key={t.id} value={t.name}>{t.name} ({t.role})</option>)}</select></div>
+      <div className="modal-field"><label>Priority</label><select value={f.priority} onChange={e=>set("priority",e.target.value)}>{Object.entries(PRIORITIES).map(([k,v])=><option key={k} value={k}>{v.label}</option>)}</select></div>
+    </div>
+    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12}}>
+      <div className="modal-field"><label>Due Date</label><input type="date" value={f.dueDate} onChange={e=>set("dueDate",e.target.value)}/></div>
+      <div className="modal-field"><label>Platform (optional)</label><select value={f.platform} onChange={e=>set("platform",e.target.value)}><option value="">General</option>{ch.map(c=><option key={c} value={c}>{PLATFORMS[c].label}</option>)}</select></div>
+    </div>
+    <div className="modal-actions"><button className="btn" onClick={onClose}>Cancel</button><button className="btn btn-p" onClick={submit}>{I.plus} Create Task</button></div>
+  </div></div>;
+}
+
 // ─── Sidebar ─────────────────────────────────────────────────────────────────
 function Sidebar({page,nav,alertCount,posts}){
   const{user,logout}=useAuth();const ch=getUserChannels(user);
@@ -421,6 +554,7 @@ function Sidebar({page,nav,alertCount,posts}){
       {user.isAdmin&&<div className={`sb-item ${page==="dashboard"?"active":""}`} onClick={()=>nav("dashboard")}><span className="icon">{I.dashboard}</span>Dashboard{alertCount>0&&<span className="sb-badge">{alertCount}</span>}</div>}
       <div className={`sb-item ${page==="calendar"?"active":""}`} onClick={()=>nav("calendar")}><span className="icon">{I.calendar}</span>Calendar</div>
       <div className={`sb-item ${page==="posts"?"active":""}`} onClick={()=>nav("posts")}><span className="icon">{I.posts}</span>All Posts</div>
+      {(user.isAdmin||user.channels.includes("instagram")||user.channels[0]==="all")&&<div className={`sb-item ${page==="analytics"?"active":""}`} onClick={()=>nav("analytics")}><span className="icon">{I.chart}</span>IG Analytics</div>}
       {(user.isAdmin||user.role.includes("Head"))&&<div className={`sb-item ${page==="approvals"?"active":""}`} onClick={()=>nav("approvals")}><span className="icon">{I.check}</span>Approvals{revC>0&&<span className="sb-badge">{revC}</span>}</div>}
       <div className={`sb-item ${page==="tasks"?"active":""}`} onClick={()=>nav("tasks")}><span className="icon">{I.task}</span>Tasks</div>
     </div>
@@ -546,15 +680,27 @@ function PostsPage({sel,posts,onAddPost}){
 }
 
 // ─── Tasks ───────────────────────────────────────────────────────────────────
-function TasksPage({sel,posts}){
-  const{user}=useAuth();const[tf,setTf]=useState("all");
-  const allT=posts.filter(p=>canAccess(user,p.platform)).flatMap(p=>p.tasks.map(t=>({...t,post:p})));
+function TasksPage({sel,posts,standaloneTasks,onAddTask,onToggleTask}){
+  const{user}=useAuth();const[tf,setTf]=useState("all");const[tab,setTab]=useState("all");const[showAdd,setShowAdd]=useState(false);
+  const canCreate=user.isAdmin||user.role.includes("Head");
+  const postTasks=posts.filter(p=>canAccess(user,p.platform)).flatMap(p=>p.tasks.map(t=>({...t,post:p,source:"post",priority:"normal"})));
+  const stTasks=(standaloneTasks||[]).filter(t=>user.isAdmin||user.channels[0]==="all"||!t.platform||user.channels.includes(t.platform)).map(t=>({...t,source:"standalone"}));
+  const allT=tab==="standalone"?stTasks:tab==="post"?postTasks:[...stTasks,...postTasks];
   const filtered=tf==="all"?allT:allT.filter(t=>t.status===tf);
+  const PB=({priority})=>{const p=PRIORITIES[priority||"normal"];return<span className="priority-badge" style={{background:p.bg,color:p.color}}>{p.label}</span>;};
   return<div>
-    <div className="page-h"><div><h2>Tasks</h2><div className="page-h-sub">{allT.length} tasks across your channels</div></div></div>
-    <div className="filter-bar"><div className={`filter-chip ${tf==="all"?"active":""}`} onClick={()=>setTf("all")}>All ({allT.length})</div>{Object.entries(TASK_STATUSES).map(([k,v])=><div key={k} className={`filter-chip ${tf===k?"active":""}`} onClick={()=>setTf(k)}>{v} ({allT.filter(t=>t.status===k).length})</div>)}</div>
-    <table className="table"><thead><tr><th>Task</th><th>Post</th><th>Platform</th><th>Assigned To</th><th>Due Date</th><th>Status</th></tr></thead>
-      <tbody>{filtered.map(t=><tr key={t.id} onClick={()=>sel(t.post)}><td style={{color:"var(--text)",fontWeight:500}}>{t.type}</td><td style={{maxWidth:180,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t.post.caption.slice(0,35)}</td><td><PT platform={t.post.platform}/></td><td><div style={{display:"flex",alignItems:"center",gap:7}}><AV user={t.assignee} size={24}/><span style={{fontSize:12}}>{t.assignee.name.split(" ")[0]}</span></div></td><td style={{fontFamily:"var(--fm)",fontSize:12}}>{t.dueDate}</td><td><TSB status={t.status}/></td></tr>)}</tbody></table>
+    <div className="page-h"><div><h2>Tasks</h2><div className="page-h-sub">{postTasks.length+stTasks.length} total — {stTasks.filter(t=>t.status!=="done").length} standalone open</div></div>{canCreate&&<div className="page-h-actions"><button className="btn btn-p" onClick={()=>setShowAdd(true)}>{I.plus} Assign Task</button></div>}</div>
+    <div className="tabs"><div className={`tab ${tab==="all"?"active":""}`} onClick={()=>setTab("all")}>All ({postTasks.length+stTasks.length})</div><div className={`tab ${tab==="standalone"?"active":""}`} onClick={()=>setTab("standalone")}>Standalone ({stTasks.length})</div><div className={`tab ${tab==="post"?"active":""}`} onClick={()=>setTab("post")}>Post Tasks ({postTasks.length})</div></div>
+    <div className="filter-bar"><div className={`filter-chip ${tf==="all"?"active":""}`} onClick={()=>setTf("all")}>All</div>{Object.entries(TASK_STATUSES).map(([k,v])=><div key={k} className={`filter-chip ${tf===k?"active":""}`} onClick={()=>setTf(k)}>{v} ({allT.filter(t=>t.status===k).length})</div>)}</div>
+    {tab!=="post"&&stTasks.length>0&&(tf==="all"?stTasks:stTasks.filter(t=>t.status===tf)).map(t=><div key={t.id} className="task-card" onClick={()=>onToggleTask&&onToggleTask(t.id)}>
+      <div className={`task-card-check ${t.status}`}>{t.status==="done"&&<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round"><path d="M5 13l4 4L19 7"/></svg>}{t.status==="in_progress"&&<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round"><path d="M5 12h14"/></svg>}</div>
+      <div className="task-card-body"><div className={`task-card-title ${t.status==="done"?"done":""}`}>{t.title}</div>{t.description&&<div className="task-card-desc">{t.description}</div>}
+        <div className="task-card-meta"><PB priority={t.priority}/><div className="task-meta-chip"><AV user={t.assignee} size={18}/>{t.assignee.name.split(" ")[0]}</div><div className="task-meta-chip">{I.clock} {t.dueDate}</div>{t.platform&&<div className="task-meta-chip"><span className="sb-dot" style={{background:PLATFORMS[t.platform]?.color,width:6,height:6}}/>{PLATFORMS[t.platform]?.label}</div>}<div className="task-meta-chip">by {t.createdBy.name.split(" ")[0]}</div></div>
+      </div><TSB status={t.status}/>
+    </div>)}
+    {tab!=="standalone"&&<table className="table" style={{marginTop:tab==="all"&&stTasks.length>0?16:0}}><thead><tr><th>Task</th><th>Post</th><th>Platform</th><th>Assigned To</th><th>Due Date</th><th>Status</th></tr></thead>
+      <tbody>{(tf==="all"?postTasks:postTasks.filter(t=>t.status===tf)).map(t=><tr key={t.id} onClick={()=>sel(t.post)}><td style={{color:"var(--text)",fontWeight:500}}>{t.type}</td><td style={{maxWidth:180,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t.post.caption.slice(0,35)}</td><td><PT platform={t.post.platform}/></td><td><div style={{display:"flex",alignItems:"center",gap:7}}><AV user={t.assignee} size={24}/><span style={{fontSize:12}}>{t.assignee.name.split(" ")[0]}</span></div></td><td style={{fontFamily:"var(--fm)",fontSize:12}}>{t.dueDate}</td><td><TSB status={t.status}/></td></tr>)}</tbody></table>}
+    {showAdd&&<AssignTaskModal onClose={()=>setShowAdd(false)} onAdd={onAddTask}/>}
   </div>;
 }
 
@@ -688,6 +834,7 @@ export default function App(){
   const[page,setPage]=useState("dashboard");const[selPost,setSelPost]=useState(null);const[theme,setTheme]=useState("light");const[user,setUser]=useState(null);
   const[posts,setPosts]=useState([]);const[chats,setChats]=useState({instagram:[],linkedin:[],youtube:[],x:[]});
   const[loading,setLoading]=useState(false);const[teamMap,setTeamMap]=useState({});
+  const[standaloneTasks,setStandaloneTasks]=useState(initStandaloneTasks);
 
   // Build team map for lookups
   useEffect(()=>{
@@ -811,6 +958,14 @@ export default function App(){
     fetchChats();
   };
 
+  const addStandaloneTask=(form)=>{
+    setStandaloneTasks(p=>[{id:"st-"+Date.now(),title:form.title,description:form.description,assignee:form.assignee,priority:form.priority,status:"todo",dueDate:form.dueDate,platform:form.platform||null,createdBy:form.createdBy,createdAt:new Date().toISOString().split("T")[0]},...p]);
+  };
+  const toggleTaskStatus=(taskId)=>{
+    const cycle={todo:"in_progress",in_progress:"done",done:"todo"};
+    setStandaloneTasks(p=>p.map(t=>t.id===taskId?{...t,status:cycle[t.status]||"todo"}:t));
+  };
+
   const spd=selPost?posts.find(p=>p.id===selPost.id)||selPost:null;
   const ua=user?ALERTS.filter(a=>canAccess(user,a.platform)):[];
 
@@ -819,7 +974,8 @@ export default function App(){
     if(page==="calendar")return<CalendarPage sel={setSelPost} posts={posts} onAddPost={addPost}/>;
     if(page==="posts")return<PostsPage sel={setSelPost} posts={posts} onAddPost={addPost}/>;
     if(page==="approvals")return<ApprovalsPage sel={setSelPost} posts={posts}/>;
-    if(page==="tasks")return<TasksPage sel={setSelPost} posts={posts}/>;
+    if(page==="tasks")return<TasksPage sel={setSelPost} posts={posts} standaloneTasks={standaloneTasks} onAddTask={addStandaloneTask} onToggleTask={toggleTaskStatus}/>;
+    if(page==="analytics")return<InstagramAnalyticsPage/>;
     if(page==="upload")return<UploadPage onImport={importCSV}/>;
     if(page==="team")return<TeamPage/>;
     if(page.startsWith("chat-"))return<ChatPage platform={page.replace("chat-","")} chats={chats} onSend={sendChat}/>;
